@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+</head>
+
+<body>
+
+<header>
+    <h1>Admin Panel</h1>
+</header>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="projects.html">Projects</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+</nav>
+
+<main>
+
+    <section class="card">
+        <h2>Add New Project</h2>
+
+        <input
+            id="title"
+            placeholder="Project title">
+
+        <br><br>
+
+        <textarea
+            id="description"
+            placeholder="Short project description">
+        </textarea>
+
+        <br><br>
+
+        <textarea
+            id="content"
+            placeholder="Project notes / details">
+        </textarea>
+
+        <br><br>
+
+        <button onclick="addProject()">
+            Create Project
+        </button>
+    </section>
+
+    <section class="card">
+        <h2>Existing Projects</h2>
+
+        <div id="adminProjectList">
+            Loading projects...
+        </div>
+    </section>
+
+    <section class="card">
+        <button onclick="logout()">
+            Logout
+        </button>
+    </section>
+
+</main>
+
+<script src="auth-check.js"></script>
+<script src="admin.js"></script>
+<script src="admin-projects.js"></script>
+<script src="logout.js"></script>
+
+</body>
+</html>
