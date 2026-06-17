@@ -1,3 +1,1 @@
-# Wasteland-Works-Website
-
-© 2026 Wasteland Works. All rights reserved
+access website using https://renruin.github.io/Wasteland-Works-Website/
