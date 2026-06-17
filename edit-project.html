@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Project</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+</head>
+
+<body>
+
+<header>
+    <h1>Edit Project</h1>
+</header>
+
+<nav>
+    <a href="admin.html">Admin</a>
+    <a href="projects.html">Public Projects</a>
+</nav>
+
+<main>
+
+    <section class="card">
+        <h2>Edit Project Info</h2>
+
+        <input id="editTitle" placeholder="Project title">
+
+        <br><br>
+
+        <textarea id="editDescription" placeholder="Short description"></textarea>
+
+        <br><br>
+
+        <textarea id="editContent" placeholder="Project overview / main details"></textarea>
+
+        <br><br>
+
+        <button type="button" onclick="updateProject()">Save Changes</button>
+        <button type="button" onclick="deleteProject()">Delete Project</button>
+    </section>
+
+    <section class="card">
+        <h2>Add Project Note</h2>
+
+        <textarea id="newNote" placeholder="Example: Added new button feature"></textarea>
+
+        <br><br>
+
+        <button type="button" onclick="addNote()">Add Note</button>
+    </section>
+
+    <section class="card">
+        <h2>Project Notes Log</h2>
+
+        <div id="notesList">Loading notes...</div>
+    </section>
+
+    <section class="card">
+        <h2>Upload File / Photo</h2>
+
+        <input type="file" id="fileInput">
+
+        <br><br>
+
+        <button type="button" onclick="uploadFile()">Upload File</button>
+
+        <p>Photos, PDFs, audio files, ZIP files, and documents are supported.</p>
+    </section>
+
+    <section class="card">
+        <h2>Uploaded Files</h2>
+
+        <div id="fileList">Loading files...</div>
+    </section>
+
+</main>
+
+<script src="auth-check.js"></script>
+
+<script>
+let currentProjectId = null;
+
+async function loadProjectForEditing() {
+    const params = new URLSearchParams(window.location.search);
+    currentProjectId = params.get("id");
+
+    if (!currentProjectId) {
+        alert("No project selected.");
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .from("projects")
+        .select("*")
+        .eq("id", Number(currentProjectId))
+        .single();
+
+    if (error) {
+        alert("Project not found.");
+        return;
+    }
+
+    document.getElementById("editTitle").value = data.title || "";
+    document.getElementById("editDescription").value = data.description || "";
+    document.getElementById("editContent").value = data.content || "";
+}
+
+async function updateProject() {
+    const title = document.getElementById("editTitle").value;
+    const description = document.getElementById("editDescription").value;
+    const content = document.getElementById("editContent").value;
+
+    const { error } = await supabaseClient
+        .from("projects")
+        .update({
+            title: title,
+            description: description,
+            content: content
+        })
+        .eq("id", Number(currentProjectId));
+
+    if (error) {
+        alert("Update error: " + error.message);
+    } else {
+        alert("Project updated!");
+    }
+}
+
+async function deleteProject() {
+    const confirmDelete = confirm("Delete this project? This cannot be undone.");
+
+    if (!confirmDelete) return;
+
+    const { error } = await supabaseClient
+        .from("projects")
+        .delete()
+        .eq("id", Number(currentProjectId));
+
+    if (error) {
+        alert("Delete error: " + error.message);
+    } else {
+        alert("Project deleted.");
+        window.location.href = "admin.html";
+    }
+}
+
+async function addNote() {
+    const noteText = document.getElementById("newNote").value;
+
+    if (noteText.trim() === "") {
+        alert("Type a note first.");
+        return;
+    }
+
+    const { error } = await supabaseClient
+        .from("project_notes")
+        .insert([
+            {
+                project_id: Number(currentProjectId),
+                note_text: noteText
+            }
+        ]);
+
+    if (error) {
+        alert("Note error: " + error.message);
+        return;
+    }
+
+    document.getElementById("newNote").value = "";
+    loadNotes();
+}
+
+async function deleteNote(noteId) {
+    const confirmDelete = confirm("Delete this note?");
+
+    if (!confirmDelete) return;
+
+    const { error } = await supabaseClient
+        .from("project_notes")
+        .delete()
+        .eq("id", Number(noteId));
+
+    if (error) {
+        alert("Delete note error: " + error.message);
+        return;
+    }
+
+    loadNotes();
+}
+
+async function loadNotes() {
+    const { data, error } = await supabaseClient
+        .from("project_notes")
+        .select("*")
+        .eq("project_id", Number(currentProjectId))
+        .order("created_at", { ascending: false });
+
+    const notesList = document.getElementById("notesList");
+
+    if (error) {
+        notesList.innerHTML = "Error loading notes.";
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        notesList.innerHTML = "<p>No notes yet.</p>";
+        return;
+    }
+
+    notesList.innerHTML = "";
+
+    data.forEach(note => {
+        const date = new Date(note.created_at).toLocaleString();
+
+        notesList.innerHTML += `
+            <div class="card">
+                <strong>${date}</strong>
+                <p>${note.note_text}</p>
+
+                <button type="button" onclick="deleteNote(${note.id})">
+                    Delete Note
+                </button>
+            </div>
+        `;
+    });
+}
+
+async function uploadFile() {
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("Choose a file first.");
+        return;
+    }
+
+    const safeFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+
+    const filePath =
+        Number(currentProjectId) + "/" + Date.now() + "_" + safeFileName;
+
+    const { error: uploadError } = await supabaseClient.storage
+        .from("project-files")
+        .upload(filePath, file);
+
+    if (uploadError) {
+        alert("Upload error: " + uploadError.message);
+        return;
+    }
+
+    const { data: urlData } = supabaseClient.storage
+        .from("project-files")
+        .getPublicUrl(filePath);
+
+    const publicUrl = urlData.publicUrl;
+
+    const { error: dbError } = await supabaseClient
+        .from("project_files")
+        .insert([
+            {
+                project_id: Number(currentProjectId),
+                file_name: file.name,
+                file_url: publicUrl,
+                file_type: file.type
+            }
+        ]);
+
+    if (dbError) {
+        alert("Database error: " + dbError.message);
+        return;
+    }
+
+    alert("File uploaded!");
+    fileInput.value = "";
+    loadFiles();
+}
+
+function getStoragePathFromUrl(fileUrl) {
+    const marker = "/storage/v1/object/public/project-files/";
+    const parts = fileUrl.split(marker);
+
+    if (parts.length < 2) {
+        return null;
+    }
+
+    return parts[1];
+}
+
+async function deleteFile(fileId, fileUrl) {
+    const confirmDelete = confirm("Delete this file?");
+
+    if (!confirmDelete) return;
+
+    const storagePath = getStoragePathFromUrl(fileUrl);
+
+    if (storagePath) {
+        await supabaseClient.storage
+            .from("project-files")
+            .remove([storagePath]);
+    }
+
+    const { error } = await supabaseClient
+        .from("project_files")
+        .delete()
+        .eq("id", Number(fileId));
+
+    if (error) {
+        alert("Delete file error: " + error.message);
+        return;
+    }
+
+    alert("File deleted.");
+    loadFiles();
+}
+
+async function loadFiles() {
+    const { data, error } = await supabaseClient
+        .from("project_files")
+        .select("*")
+        .eq("project_id", Number(currentProjectId))
+        .order("created_at", { ascending: false });
+
+    const fileList = document.getElementById("fileList");
+
+    if (error) {
+        fileList.innerHTML = "Error loading files.";
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        fileList.innerHTML = "<p>No files uploaded yet.</p>";
+        return;
+    }
+
+    fileList.innerHTML = "";
+
+    data.forEach(file => {
+        if (file.file_type && file.file_type.startsWith("image/")) {
+            fileList.innerHTML += `
+                <div>
+                    <p>${file.file_name}</p>
+
+                    <img src="${file.file_url}"
+                         style="max-width: 250px; border: 1px solid #00ff66;">
+
+                    <br><br>
+
+                    <a href="${file.file_url}" target="_blank">Open File</a>
+
+                    <br><br>
+
+                    <button type="button" onclick="deleteFile(${file.id}, '${file.file_url}')">
+                        Delete File
+                    </button>
+                </div>
+                <br>
+            `;
+        } else {
+            fileList.innerHTML += `
+                <div>
+                    <p>
+                        <a href="${file.file_url}" target="_blank">
+                            ${file.file_name}
+                        </a>
+                    </p>
+
+                    <button type="button" onclick="deleteFile(${file.id}, '${file.file_url}')">
+                        Delete File
+                    </button>
+                </div>
+                <br>
+            `;
+        }
+    });
+}
+
+loadProjectForEditing().then(() => {
+    loadFiles();
+    loadNotes();
+});
+</script>
+
+</body>
+</html>

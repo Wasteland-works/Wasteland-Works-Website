@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html long="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wasteland Works</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            border-bottom: 2px solid #00ff66;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-small {
+            width: 70px;
+            height: auto;
+        }
+
+        .brand-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            max-width: 800px;
+            margin: 15px auto;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            border: 1px solid #00ff66;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #00ff66;
+            font-weight: bold;
+        }
+
+        .button:hover {
+            background-color: #00ff66;
+            color: #111111;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            border: 1px solid #00ff66;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            border-top: 2px solid #00ff66;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+
+            .topbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .brand-name {
+                text-align: center;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="brand">
+        <img src="logo.png"
+             alt="Wasteland Works Logo"
+             class="logo-small">
+
+        <div class="brand-name">
+            Wasteland Works
+        </div>
+    </div>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="projects.html">Projects</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+</header>
+
+<main>
+
+    <section class="hero card">
+
+        <h1>Build. Break. Learn. Repeat.</h1>
+
+        <p>
+            Wasteland Works is a collaborative workshop focused on
+            software development, electronics, fabrication,
+            3D design, and experimental projects.
+        </p>
+
+        <p>
+            We create things because we're curious enough
+            to see what happens when an idea leaves the notebook
+            and enters the real world.
+        </p>
+
+        <a href="projects.html" class="button">
+            Explore Projects
+        </a>
+
+    </section>
+
+    <section class="card">
+
+        <h2>What We Do</h2>
+
+        <div class="features">
+
+            <div class="feature-card">
+                <h3>Software Development</h3>
+                <p>
+                    Tools, automation, websites,
+                    applications and experiments.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Electronics</h3>
+                <p>
+                    Arduino projects,
+                    microcontrollers,
+                    sensors and hardware.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>3D Design</h3>
+                <p>
+                    CAD modelling,
+                    prototypes and
+                    3D printed creations.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Experimental Builds</h3>
+                <p>
+                    The projects that start
+                    with "What if we tried..."
+                    and somehow become real.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="card">
+
+        <h2>Current Workshop Status</h2>
+
+        <p>
+            Active development is ongoing.
+        </p>
+
+        <p>
+            New projects, hardware prototypes,
+            software experiments and future products
+            are currently in progress.
+        </p>
+
+        <p>
+            Check the Projects section for the latest updates.
+        </p>
+
+    </section>
+
+    <section class="card">
+
+        <h2>Future Products</h2>
+
+        <p>
+            Wasteland Works intends to offer custom designs,
+            electronics, fabrication projects,
+            and other creations in the future.
+        </p>
+
+        <p>
+            Nothing is available for purchase yet,
+            but development is underway.
+        </p>
+
+    </section>
+
+</main>
+
+<footer>
+
+    <p>
+        © 2025 Wasteland Works
+    </p>
+
+    <p>
+        Programming • Electronics • Fabrication • Design
+    </p>
+
+</footer>
+
+</body>
+</html>
