@@ -9,9 +9,9 @@
     <title>Create Account</title>
 
     <link rel="stylesheet" href="style.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase.js"></script>
+    
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="register.js"></script>
 
 </head>
 
@@ -27,32 +27,32 @@
 
 <input
     id="displayName"
-    placeholder="Display Name">
-
+    <label for="displayName">Display Name</label>
+    <input id="displayName" type="text">
 <br><br>
 
 <input
     id="email"
     type="email"
-    placeholder="Email Address">
+    autocomplete="email">
 
 <br><br>
 
 <input
     id="password"
     type="password"
-    placeholder="Password">
+    autocomplete="Password">
 
 <br><br>
 
 <input
     id="confirmPassword"
     type="password"
-    placeholder="Confirm Password">
+    autocomplete="Confirm Password">
 
 <br><br>
 
-<button onclick="createAccount()">
+<button id="registerButton" onclick="createAccount()">
     Create Account
 </button>
 
