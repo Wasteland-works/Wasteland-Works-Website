@@ -1,15 +1,36 @@
-async function login() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+import {
+    auth,
+    signInWithEmailAndPassword
+} from "./firebase.js";
 
-    const { error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-    });
+window.login = async function () {
 
-    if (error) {
-        alert("Login failed: " + error.message);
-    } else {
-        window.location.href = "admin.html";
+    const email =
+        document.getElementById("email").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    const message =
+        document.getElementById("message");
+
+    message.textContent = "";
+
+    try {
+
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        window.location.href = "index.html";
+
     }
-}
+    catch (error) {
+
+        message.textContent = error.message;
+
+    }
+
+};
