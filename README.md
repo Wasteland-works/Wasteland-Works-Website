@@ -1,5 +1,4 @@
 wasteland works
 
-access website using https://renruin.github.io/Wasteland-Works-Website/
-
+access website using [](https://wasteland-works.com/)
 © 2026 Wasteland Works all rights reserved
