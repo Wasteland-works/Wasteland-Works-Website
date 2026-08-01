@@ -1,151 +1,62 @@
+import { auth } from "./firebase.js";
+import { ensureUserProfile } from "./profile.js";
 import {
-    auth,
     createUserWithEmailAndPassword,
+    onAuthStateChanged,
+    sendEmailVerification,
     updateProfile
-} from "./firebase.js";
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
-window.createAccount = async function () {
+const form = document.getElementById("registerForm");
+const displayName = document.getElementById("displayName");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const confirmation = document.getElementById("confirmPassword");
+const button = document.getElementById("registerButton");
+const message = document.getElementById("message");
+let creating = false;
 
-    const displayName =
-        document.getElementById("displayName").value.trim();
-
-    const email =
-        document.getElementById("email").value.trim();
-
-    const password =
-        document.getElementById("password").value;
-
-    const confirmPassword =
-        document.getElementById("confirmPassword").value;
-
-    const message =
-        document.getElementById("message");
-
-    const button =
-        document.getElementById("registerButton");
-
-    message.textContent = "";
-
-    if (displayName === "") {
-        message.textContent = "Please enter a display name.";
-        return;
-    }
-
-    if (email === "") {
-        message.textContent = "Please enter your email address.";
-        return;
-    }
-
-    if (password.length < 6) {
-        message.textContent = "Password must be at least 6 characters.";
-        return;
-    }
-
-    if (password !== confirmPassword) {
-        message.textContent = "Passwords do not match.";
-        return;
-    }
-
-    try {
-
-        button.disabled = true;
-        button.textContent = "Creating Account...";
-
-        const userCredential =
-            await createUserWithEmailAndPassword(
-                auth,
-                email,
-                password
-            );
-
-        await updateProfile(
-            userCredential.user,
-            {
-                displayName: displayName
-            }
-        );
-
-        message.textContent =
-            "Account created successfully! Redirecting...";
-
-        setTimeout(() => {
-
-            window.location.href = "login.html";
-
-        }, 1500);
-
-    }
-    catch (error) {
-
-        console.error(error);
-
-        message.textContent = error.message;
-
-        button.disabled = false;
-        button.textContent = "Create Account";
-
-    }
-
-};        message.textContent =
-            "Password must be at least 6 characters.";
-        return;
-    }
-
-    if (password !== confirmPassword) {
-        message.textContent =
-            "Passwords do not match.";
-        return;
-    }
-
-    try {
-
-        const userCredential =
-            await createUserWithEmailAndPassword(
-                auth,
-                email,
-                password
-            );
-
-        await updateProfile(
-            userCredential.user,
-            {
-                displayName: displayName
-            }
-        );
-
-        message.textContent =
-            "Account created successfully! Redirecting...";
-
-        setTimeout(() => {
-
-            window.location.href = "login.html";
-
-        }, 1500);
-
-    }
-    catch (error) {
-
-        message.textContent = error.message;
-
-    }
-
-};
-                data: {
-                    display_name: displayName
-                }
-
-            }
-
-        });
-
-    if (error) {
-
-        message.textContent = error.message;
-        return;
-
-    }
-
-    message.textContent =
-        "Account created! Please check your email to verify your account.";
-
+function showMessage(text, type = "") {
+    message.textContent = text;
+    message.className = `form-message ${type}`;
 }
+
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (displayName.value.trim().length < 3) {
+        showMessage("Display name must be at least 3 characters.", "error");
+        return;
+    }
+    if (password.value !== confirmation.value) {
+        showMessage("The passwords do not match.", "error");
+        return;
+    }
+
+    creating = true;
+    button.disabled = true;
+    button.textContent = "Creating account…";
+    showMessage("Building your member profile…");
+
+    try {
+        const credential = await createUserWithEmailAndPassword(auth, email.value.trim(), password.value);
+        await updateProfile(credential.user, { displayName: displayName.value.trim() });
+        await ensureUserProfile(credential.user);
+        await sendEmailVerification(credential.user);
+        window.location.replace("account.html?welcome=1");
+    } catch (error) {
+        console.error(error);
+        const errors = {
+            "auth/email-already-in-use": "An account already exists for that email.",
+            "auth/invalid-email": "Enter a valid email address.",
+            "auth/weak-password": "Use a password with at least 6 characters."
+        };
+        creating = false;
+        button.disabled = false;
+        button.textContent = "Create account";
+        showMessage(errors[error.code] || "Couldn’t create the account. Please try again.", "error");
+    }
+});
+
+onAuthStateChanged(auth, (user) => {
+    if (user && !creating) window.location.replace("account.html");
+});

@@ -1,130 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Create Account - Wasteland Works</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create your Wasteland Works account.">
+    <title>Create account - Wasteland Works</title>
     <link rel="stylesheet" href="style.css">
-
-    <!-- Firebase -->
-    <script type="module" src="firebase.js"></script>
-    <script type="module" src="register.js"></script>
-
 </head>
-
 <body>
-
     <div id="site-header"></div>
+    <main class="auth-main">
+        <section class="card auth-card">
+            <p class="eyebrow">Join the workshop</p>
+            <h1>Create account</h1>
+            <p class="muted">Set up your Wasteland Works member profile.</p>
 
-    <main>
+            <form id="registerForm">
+                <label for="displayName">Display name</label>
+                <input id="displayName" type="text" autocomplete="nickname" minlength="3" maxlength="50" placeholder="What should we call you?" required>
 
-        <section class="card">
+                <label for="email">Email address</label>
+                <input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
 
-            <h1>Create Account</h1>
+                <label for="password">Password</label>
+                <input id="password" type="password" autocomplete="new-password" minlength="6" placeholder="At least 6 characters" required>
 
-            <p>
-                Create your Wasteland Works account.
-            </p>
+                <label for="confirmPassword">Confirm password</label>
+                <input id="confirmPassword" type="password" autocomplete="new-password" minlength="6" placeholder="Repeat your password" required>
 
-            <br>
+                <button class="button button-solid" id="registerButton" type="submit">Create account</button>
+                <p class="form-message" id="message" role="status" aria-live="polite"></p>
+            </form>
 
-            <label for="displayName">
-                Display Name
-            </label>
-
-            <br>
-
-            <input
-                id="displayName"
-                type="text"
-                placeholder="Display Name"
-                autocomplete="nickname"
-                required>
-
-            <br><br>
-
-            <label for="email">
-                Email Address
-            </label>
-
-            <br>
-
-            <input
-                id="email"
-                type="email"
-                placeholder="Email Address"
-                autocomplete="email"
-                required>
-
-            <br><br>
-
-            <label for="password">
-                Password
-            </label>
-
-            <br>
-
-            <input
-                id="password"
-                type="password"
-                placeholder="Password"
-                autocomplete="new-password"
-                required>
-
-            <br><br>
-
-            <label for="confirmPassword">
-                Confirm Password
-            </label>
-
-            <br>
-
-            <input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm Password"
-                autocomplete="new-password"
-                required>
-
-            <br><br>
-
-            <button
-                id="registerButton"
-                type="button"
-                onclick="createAccount()">
-
-                Create Account
-
-            </button>
-
-            <br><br>
-
-            <p>
-
-                Already have an account?
-
-                <a href="login.html">
-                    Sign In
-                </a>
-
-            </p>
-
-            <p id="message"></p>
-
+            <p class="auth-switch">Already have an account? <a href="login.html">Sign in</a></p>
         </section>
-
     </main>
-
     <div id="site-footer"></div>
-
     <script src="load-layout.js"></script>
-
+    <script type="module" src="register.js"></script>
 </body>
-
 </html>

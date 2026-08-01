@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Manage your Wasteland Works account.">
+    <title>My account - Wasteland Works</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="site-header"></div>
+    <main class="account-main">
+        <section class="account-heading">
+            <div><p class="eyebrow">Member profile</p><h1 id="welcomeMessage">Loading your account…</h1><p class="muted">Manage your identity and view your access.</p></div>
+            <div class="account-avatar" id="accountAvatar" aria-hidden="true">—</div>
+        </section>
+
+        <section class="account-stats">
+            <article class="card"><span>Membership</span><strong id="membershipDisplay">—</strong></article>
+            <article class="card"><span>Role</span><strong id="roleDisplay">—</strong></article>
+            <article class="card"><span>Email</span><strong id="verificationDisplay">—</strong></article>
+        </section>
+
+        <section class="card account-card">
+            <div class="account-section-heading"><div><p class="eyebrow">Profile</p><h2>Your details</h2></div><button class="button" id="editProfileButton" type="button">Edit profile</button></div>
+            <form id="profileForm">
+                <div class="account-fields">
+                    <div><label for="displayName">Display name</label><input id="displayName" type="text" maxlength="50" disabled required></div>
+                    <div><label for="username">Username</label><input id="username" type="text" minlength="3" maxlength="30" disabled required></div>
+                    <div><label for="currentEmail">Email address</label><input id="currentEmail" type="email" disabled></div>
+                    <div><label for="formsId">Forms ID</label><input id="formsId" type="text" disabled></div>
+                </div>
+                <div class="form-actions" id="profileActions" hidden>
+                    <button class="button button-solid" id="saveProfileButton" type="submit">Save changes</button>
+                    <button class="button" id="cancelEditButton" type="button">Cancel</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card account-card security-card">
+            <div><p class="eyebrow">Security</p><h2>Email & password</h2><p class="muted">Verify your address or request a secure password-reset link.</p></div>
+            <div class="security-actions">
+                <button class="button" id="verifyEmailButton" type="button">Send verification email</button>
+                <button class="button" id="resetPasswordButton" type="button">Reset password</button>
+                <button class="button danger-button" id="logoutButton" type="button">Log out</button>
+            </div>
+        </section>
+
+        <p class="form-message account-message" id="message" role="status" aria-live="polite"></p>
+    </main>
+    <div id="site-footer"></div>
+    <script src="load-layout.js"></script>
+    <script type="module" src="account.js"></script>
+</body>
+</html>

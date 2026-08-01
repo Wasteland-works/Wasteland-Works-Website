@@ -1,36 +1,65 @@
+import { auth } from "./firebase.js";
+import { ensureUserProfile } from "./profile.js";
 import {
-    auth,
+    onAuthStateChanged,
+    sendPasswordResetEmail,
     signInWithEmailAndPassword
-} from "./firebase.js";
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
-window.login = async function () {
+const form = document.getElementById("loginForm");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const button = document.getElementById("loginButton");
+const reset = document.getElementById("resetPassword");
+const message = document.getElementById("message");
+let signingIn = false;
 
-    const email =
-        document.getElementById("email").value.trim();
+const errors = {
+    "auth/invalid-credential": "That email or password doesn’t look right.",
+    "auth/invalid-email": "Enter a valid email address.",
+    "auth/too-many-requests": "Too many attempts. Please wait and try again.",
+    "auth/network-request-failed": "Couldn’t connect. Check your internet connection."
+};
 
-    const password =
-        document.getElementById("password").value;
+function showMessage(text, type = "") {
+    message.textContent = text;
+    message.className = `form-message ${type}`;
+}
 
-    const message =
-        document.getElementById("message");
-
-    message.textContent = "";
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    signingIn = true;
+    button.disabled = true;
+    button.textContent = "Signing in…";
+    showMessage("Checking your account…");
 
     try {
-
-        await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-
-        window.location.href = "index.html";
-
+        const credential = await signInWithEmailAndPassword(auth, email.value.trim(), password.value);
+        await ensureUserProfile(credential.user);
+        window.location.replace("account.html");
+    } catch (error) {
+        console.error(error);
+        signingIn = false;
+        button.disabled = false;
+        button.textContent = "Sign in";
+        showMessage(errors[error.code] || "Sign-in failed. Please try again.", "error");
     }
-    catch (error) {
+});
 
-        message.textContent = error.message;
-
+reset.addEventListener("click", async () => {
+    if (!email.validity.valid) {
+        showMessage("Enter your email address first.", "error");
+        email.focus();
+        return;
     }
+    try {
+        await sendPasswordResetEmail(auth, email.value.trim());
+        showMessage("Password reset email sent.", "success");
+    } catch (error) {
+        showMessage(errors[error.code] || "Couldn’t send the reset email.", "error");
+    }
+});
 
-};
+onAuthStateChanged(auth, (user) => {
+    if (user && !signingIn) window.location.replace("account.html");
+});

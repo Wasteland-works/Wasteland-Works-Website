@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsProfile(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      allow read: if ownsProfile(userId);
+
+      allow create: if ownsProfile(userId)
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role == "user"
+        && request.resource.data.membership == "guest"
+        && request.resource.data.specialAccess.enabled == false;
+
+      allow update: if ownsProfile(userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.membership == resource.data.membership
+        && request.resource.data.specialAccess == resource.data.specialAccess;
+
+      allow delete: if false;
+    }
+  }
+}
