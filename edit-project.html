@@ -37,11 +37,18 @@
         </section>
 
         <section class="card">
-            <h2>Files and photos</h2>
-            <label for="fileInput">Choose a file</label>
-            <input type="file" id="fileInput">
-            <button id="uploadFileButton" type="button">Upload file</button>
-            <p class="muted">Photos, PDFs, audio, ZIP files, and documents up to 600 MB are supported.</p>
+            <h2>Protected downloads</h2>
+            <p class="muted">Upload the large file to a release in the private downloads repository, then add its release asset details here.</p>
+            <label for="githubAssetId">Release asset ID</label>
+            <input id="githubAssetId" inputmode="numeric" pattern="[0-9]+" placeholder="Example: 123456789">
+            <label for="fileName">Display name</label>
+            <input id="fileName" type="text" placeholder="Project download.zip">
+            <label for="fileType">File type</label>
+            <input id="fileType" type="text" value="application/zip">
+            <label for="fileSize">File size in bytes (optional)</label>
+            <input id="fileSize" type="number" min="0">
+            <button id="addFileButton" type="button">Add protected download</button>
+            <p class="muted">Only authorised members receive a short-lived download link. Removing an entry here does not delete the original release file.</p>
             <div id="fileList" class="entry-list">Loading files…</div>
         </section>
 

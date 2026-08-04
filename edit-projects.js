@@ -1,18 +1,15 @@
-import { db, storage } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 import {
     addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query,
     serverTimestamp, updateDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-import {
-    deleteObject, getDownloadURL, ref, uploadBytesResumable
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js";
-
-const MAX_UPLOAD_SIZE = 600 * 1024 * 1024;
+const DOWNLOAD_GATEWAY = "https://wasteland-works-downloads.wellslee903.workers.dev";
 
 const projectId = new URLSearchParams(location.search).get("id");
 const elements = Object.fromEntries([
     "editTitle", "editDescription", "editContent", "saveProjectButton", "deleteProjectButton",
-    "newNote", "addNoteButton", "notesList", "fileInput", "uploadFileButton", "fileList", "editorMessage"
+    "newNote", "addNoteButton", "notesList", "githubAssetId", "fileName", "fileType", "fileSize",
+    "addFileButton", "fileList", "editorMessage"
 ].map(id => [id, document.getElementById(id)]));
 
 function showMessage(text, type = "success") {
@@ -68,22 +65,40 @@ async function loadFiles() {
         const file = fileSnapshot.data();
         const entry = document.createElement("article");
         entry.className = "project-entry editable-entry";
-        const link = document.createElement("a");
-        link.href = file.url;
-        link.target = "_blank";
-        link.rel = "noopener";
-        link.textContent = file.name || "Open file";
+        const name = document.createElement("strong");
+        name.textContent = file.name || "Protected download";
+        const details = document.createElement("p");
+        details.className = "muted";
+        details.textContent = file.githubAssetId ? `Protected asset ${file.githubAssetId}` : "Legacy file";
+        const download = document.createElement("button");
+        download.type = "button";
+        download.textContent = "Test download";
+        download.addEventListener("click", async () => {
+            try {
+                const token = await auth.currentUser.getIdToken();
+                const response = await fetch(`${DOWNLOAD_GATEWAY}/ticket/${file.githubAssetId}`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || "Download denied.");
+                window.location.assign(result.downloadUrl);
+            } catch (error) {
+                showMessage(error.message, "error");
+            }
+        });
         const button = document.createElement("button");
         button.className = "danger-button";
         button.type = "button";
         button.textContent = "Delete file";
         button.addEventListener("click", async () => {
             if (!confirm("Delete this file?")) return;
-            if (file.storagePath) await deleteObject(ref(storage, file.storagePath));
             await deleteDoc(fileSnapshot.ref);
             await loadFiles();
         });
-        entry.append(link, button);
+        entry.append(name, details);
+        if (file.githubAssetId) entry.append(download);
+        entry.append(button);
         elements.fileList.append(entry);
     });
 }
@@ -118,10 +133,7 @@ elements.deleteProjectButton.addEventListener("click", async () => {
         const notes = await getDocs(collection(db, "projects", projectId, "notes"));
         await Promise.all(notes.docs.map(item => deleteDoc(item.ref)));
         const files = await getDocs(collection(db, "projects", projectId, "files"));
-        await Promise.all(files.docs.map(async item => {
-            if (item.data().storagePath) await deleteObject(ref(storage, item.data().storagePath));
-            await deleteDoc(item.ref);
-        }));
+        await Promise.all(files.docs.map(item => deleteDoc(item.ref)));
         await deleteDoc(doc(db, "projects", projectId));
         window.location.replace("admin.html");
     } catch (error) {
@@ -148,49 +160,32 @@ elements.addNoteButton.addEventListener("click", async () => {
     }
 });
 
-elements.uploadFileButton.addEventListener("click", async () => {
-    const file = elements.fileInput.files[0];
-    if (!file) {
-        showMessage("Choose a file first.", "error");
+elements.addFileButton.addEventListener("click", async () => {
+    const githubAssetId = elements.githubAssetId.value.trim();
+    const name = elements.fileName.value.trim();
+    if (!/^\d+$/.test(githubAssetId) || !name) {
+        showMessage("Enter the GitHub release asset ID and a file name.", "error");
         return;
     }
-    if (file.size > MAX_UPLOAD_SIZE) {
-        showMessage("Files must be 600 MB or smaller.", "error");
-        return;
-    }
-    elements.uploadFileButton.disabled = true;
-    elements.uploadFileButton.textContent = "Uploading…";
+    elements.addFileButton.disabled = true;
     try {
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const storagePath = `project-files/${projectId}/${Date.now()}-${safeName}`;
-        const storageReference = ref(storage, storagePath);
-        const uploadTask = uploadBytesResumable(storageReference, file, {
-            contentType: file.type || "application/octet-stream"
-        });
-        await new Promise((resolve, reject) => {
-            uploadTask.on("state_changed", snapshot => {
-                const percentage = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                elements.uploadFileButton.textContent = `Uploading… ${percentage}%`;
-            }, reject, resolve);
-        });
-        const url = await getDownloadURL(storageReference);
         await addDoc(collection(db, "projects", projectId, "files"), {
-            name: file.name,
-            type: file.type || "application/octet-stream",
-            size: file.size,
-            url,
-            storagePath,
+            name,
+            type: elements.fileType.value.trim() || "application/octet-stream",
+            size: Number(elements.fileSize.value) || 0,
+            githubAssetId,
             createdAt: serverTimestamp()
         });
-        elements.fileInput.value = "";
+        elements.githubAssetId.value = "";
+        elements.fileName.value = "";
+        elements.fileSize.value = "";
         await loadFiles();
-        showMessage("File uploaded.");
+        showMessage("Protected download added to this project.");
     } catch (error) {
         console.error(error);
-        showMessage("Couldn’t upload the file. Check Firebase Storage setup.", "error");
+        showMessage("Couldn’t add the protected download.", "error");
     } finally {
-        elements.uploadFileButton.disabled = false;
-        elements.uploadFileButton.textContent = "Upload file";
+        elements.addFileButton.disabled = false;
     }
 });
 

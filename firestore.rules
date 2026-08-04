@@ -18,6 +18,15 @@ service cloud.firestore {
         );
     }
 
+    function hasDownloadAccess() {
+      return signedIn()
+        && (
+          isFounder()
+          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.membership in ["member", "supporter", "premium"]
+          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.specialAccess.enabled == true
+        );
+    }
+
     function hasVerifiedCompanyEmail() {
       return signedIn()
         && request.auth.token.email_verified == true
@@ -77,7 +86,7 @@ service cloud.firestore {
       }
 
       match /files/{fileId} {
-        allow read: if true;
+        allow read: if hasDownloadAccess();
         allow create, update, delete: if isFounder();
       }
     }

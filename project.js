@@ -1,4 +1,4 @@
-import { db } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 import { collection, doc, getDoc, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const projectId = new URLSearchParams(location.search).get("id");
@@ -7,6 +7,22 @@ const descriptionElement = document.getElementById("projectDescription");
 const contentElement = document.getElementById("projectContent");
 const notesList = document.getElementById("notesList");
 const fileList = document.getElementById("fileList");
+const DOWNLOAD_GATEWAY = "https://wasteland-works-downloads.wellslee903.workers.dev";
+
+async function startProtectedDownload(assetId) {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Sign in with an authorised membership to download this file.");
+    const token = await user.getIdToken();
+    const response = await fetch(`${DOWNLOAD_GATEWAY}/ticket/${assetId}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.downloadUrl) {
+        throw new Error(result.error || "Your membership does not include this download.");
+    }
+    window.location.assign(result.downloadUrl);
+}
 
 async function loadProject() {
     if (!projectId) throw new Error("No project selected.");
@@ -50,24 +66,54 @@ async function loadFiles() {
         const file = fileSnapshot.data();
         const entry = document.createElement("article");
         entry.className = "project-entry";
-        if (file.type?.startsWith("image/")) {
+        if (file.type?.startsWith("image/") && file.url) {
             const image = document.createElement("img");
             image.className = "project-image";
             image.src = file.url;
             image.alt = file.name || "Project image";
             entry.append(image);
         }
-        const link = document.createElement("a");
-        link.href = file.url;
-        link.target = "_blank";
-        link.rel = "noopener";
-        link.textContent = file.name || "Open file";
-        entry.append(link);
+        if (file.githubAssetId) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = file.name || "Download file";
+            button.addEventListener("click", async () => {
+                button.disabled = true;
+                const originalText = button.textContent;
+                button.textContent = "Preparing download…";
+                try {
+                    await startProtectedDownload(String(file.githubAssetId));
+                } catch (error) {
+                    console.error(error);
+                    button.disabled = false;
+                    button.textContent = originalText;
+                    alert(error.message);
+                }
+            });
+            entry.append(button);
+        } else if (file.url) {
+            const link = document.createElement("a");
+            link.href = file.url;
+            link.target = "_blank";
+            link.rel = "noopener";
+            link.textContent = file.name || "Open file";
+            entry.append(link);
+        }
         fileList.append(entry);
     });
 }
 
-Promise.all([loadProject(), loadNotes(), loadFiles()]).catch(error => {
+Promise.all([
+    loadProject(),
+    loadNotes(),
+    loadFiles().catch(error => {
+        if (error.code === "permission-denied") {
+            fileList.textContent = "Downloads are restricted to authorised members.";
+            return;
+        }
+        throw error;
+    })
+]).catch(error => {
     console.error(error);
     titleElement.textContent = error.message;
 });
