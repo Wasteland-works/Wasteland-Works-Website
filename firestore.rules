@@ -15,6 +15,35 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "founder";
     }
 
+    function hasVerifiedCompanyEmail() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('.*@wasteland-works[.]com');
+    }
+
+    function isApprovedCofounderEmail() {
+      return hasVerifiedCompanyEmail()
+        && request.auth.token.email in [
+          "ethan@wasteland-works.com",
+          "ren@wasteland-works.com",
+          "yodhivah@wasteland-works.com"
+        ];
+    }
+
+    function isStaffAccessUpdate(userId) {
+      return ownsProfile(userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.membership == "admin"
+        && request.resource.data.accountState == "admin"
+        && request.resource.data.specialAccess == resource.data.specialAccess
+        && hasVerifiedCompanyEmail()
+        && (
+          request.resource.data.role == resource.data.role
+          || (request.resource.data.role == "founder" && isApprovedCofounderEmail())
+        );
+    }
+
     match /users/{userId} {
       allow read: if ownsProfile(userId);
 
@@ -24,11 +53,13 @@ service cloud.firestore {
         && request.resource.data.membership == "guest"
         && request.resource.data.specialAccess.enabled == false;
 
-      allow update: if ownsProfile(userId)
+      allow update: if (
+        ownsProfile(userId)
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.role == resource.data.role
         && request.resource.data.membership == resource.data.membership
-        && request.resource.data.specialAccess == resource.data.specialAccess;
+        && request.resource.data.specialAccess == resource.data.specialAccess
+      ) || isStaffAccessUpdate(userId);
 
       allow delete: if false;
     }
