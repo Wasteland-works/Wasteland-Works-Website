@@ -1,114 +1,73 @@
-let currentProjectId = null;
+import { db } from "./firebase.js";
+import { collection, doc, getDoc, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const projectId = new URLSearchParams(location.search).get("id");
+const titleElement = document.getElementById("projectTitle");
+const descriptionElement = document.getElementById("projectDescription");
+const contentElement = document.getElementById("projectContent");
+const notesList = document.getElementById("notesList");
+const fileList = document.getElementById("fileList");
 
 async function loadProject() {
-    const params = new URLSearchParams(window.location.search);
-    currentProjectId = params.get("id");
-
-    if (!currentProjectId) {
-        document.getElementById("projectTitle").textContent =
-            "No Project Selected";
-        return;
-    }
-
-    const { data, error } = await supabaseClient
-        .from("projects")
-        .select("*")
-        .eq("id", Number(currentProjectId))
-        .single();
-
-    if (error) {
-        document.getElementById("projectTitle").textContent =
-            "Project Not Found";
-        return;
-    }
-
-    document.getElementById("projectTitle").textContent = data.title;
-    document.getElementById("projectDescription").textContent = data.description || "";
-    document.getElementById("projectContent").textContent = data.content || "";
+    if (!projectId) throw new Error("No project selected.");
+    const snapshot = await getDoc(doc(db, "projects", projectId));
+    if (!snapshot.exists()) throw new Error("Project not found.");
+    const project = snapshot.data();
+    document.title = `${project.title || "Project"} - Wasteland Works`;
+    titleElement.textContent = project.title || "Untitled project";
+    descriptionElement.textContent = project.description || "No description yet.";
+    contentElement.textContent = project.content || "No overview yet.";
 }
 
 async function loadNotes() {
-    const { data, error } = await supabaseClient
-        .from("project_notes")
-        .select("*")
-        .eq("project_id", Number(currentProjectId))
-        .order("created_at", { ascending: false });
-
-    const notesList = document.getElementById("notesList");
-
-    if (error) {
-        notesList.innerHTML = "Error loading notes.";
+    const snapshot = await getDocs(query(collection(db, "projects", projectId, "notes"), orderBy("createdAt", "desc")));
+    notesList.textContent = "";
+    if (snapshot.empty) {
+        notesList.textContent = "No notes yet.";
         return;
     }
-
-    if (!data || data.length === 0) {
-        notesList.innerHTML = "<p>No notes yet.</p>";
-        return;
-    }
-
-    notesList.innerHTML = "";
-
-    data.forEach(note => {
-        const date = new Date(note.created_at).toLocaleString();
-
-        notesList.innerHTML += `
-            <div class="card">
-                <strong>${date}</strong>
-                <p>${note.note_text}</p>
-            </div>
-        `;
+    snapshot.forEach(noteSnapshot => {
+        const note = noteSnapshot.data();
+        const entry = document.createElement("article");
+        entry.className = "project-entry";
+        const date = document.createElement("strong");
+        date.textContent = note.createdAt?.toDate?.().toLocaleString() || "Recent update";
+        const text = document.createElement("p");
+        text.textContent = note.text || "";
+        entry.append(date, text);
+        notesList.append(entry);
     });
 }
 
 async function loadFiles() {
-    const { data, error } = await supabaseClient
-        .from("project_files")
-        .select("*")
-        .eq("project_id", Number(currentProjectId))
-        .order("created_at", { ascending: false });
-
-    const fileList = document.getElementById("fileList");
-
-    if (error) {
-        fileList.innerHTML = "Error loading files.";
+    const snapshot = await getDocs(query(collection(db, "projects", projectId, "files"), orderBy("createdAt", "desc")));
+    fileList.textContent = "";
+    if (snapshot.empty) {
+        fileList.textContent = "No files uploaded yet.";
         return;
     }
-
-    if (!data || data.length === 0) {
-        fileList.innerHTML = "<p>No files uploaded yet.</p>";
-        return;
-    }
-
-    fileList.innerHTML = "";
-
-    data.forEach(file => {
-        if (file.file_type && file.file_type.startsWith("image/")) {
-            fileList.innerHTML += `
-                <div>
-                    <p>${file.file_name}</p>
-
-                    <img src="${file.file_url}"
-                         style="max-width: 250px; border: 1px solid #00ff66;">
-
-                    <br><br>
-
-                    <a href="${file.file_url}" target="_blank">Open File</a>
-                </div>
-                <br>
-            `;
-        } else {
-            fileList.innerHTML += `
-                <p>
-                    <a href="${file.file_url}" target="_blank">
-                        ${file.file_name}
-                    </a>
-                </p>
-            `;
+    snapshot.forEach(fileSnapshot => {
+        const file = fileSnapshot.data();
+        const entry = document.createElement("article");
+        entry.className = "project-entry";
+        if (file.type?.startsWith("image/")) {
+            const image = document.createElement("img");
+            image.className = "project-image";
+            image.src = file.url;
+            image.alt = file.name || "Project image";
+            entry.append(image);
         }
+        const link = document.createElement("a");
+        link.href = file.url;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = file.name || "Open file";
+        entry.append(link);
+        fileList.append(entry);
     });
 }
 
-loadProject().then(() => {
-    loadNotes();
-    loadFiles();
+Promise.all([loadProject(), loadNotes(), loadFiles()]).catch(error => {
+    console.error(error);
+    titleElement.textContent = error.message;
 });

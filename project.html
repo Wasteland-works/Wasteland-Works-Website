@@ -9,8 +9,6 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase.js"></script>
 </head>
 
 <body>
@@ -18,6 +16,11 @@
     <div id="site-header"></div>
 
     <main>
+
+    <section class="card project-heading-card">
+        <p class="eyebrow">Workshop project</p>
+        <h1 id="projectTitle">Loading project…</h1>
+    </section>
 
     <section class="card">
         <h2>Description</h2>
@@ -44,7 +47,7 @@
     <div id="site-footer"></div>
 
     <script src="load-layout.js"></script>
-    <script src="project.js"></script>
+    <script type="module" src="project.js"></script>
 
 </body>
 

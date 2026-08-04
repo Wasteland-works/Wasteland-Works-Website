@@ -10,6 +10,11 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == userId;
     }
 
+    function isFounder() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "founder";
+    }
+
     match /users/{userId} {
       allow read: if ownsProfile(userId);
 
@@ -26,6 +31,21 @@ service cloud.firestore {
         && request.resource.data.specialAccess == resource.data.specialAccess;
 
       allow delete: if false;
+    }
+
+    match /projects/{projectId} {
+      allow read: if true;
+      allow create, update, delete: if isFounder();
+
+      match /notes/{noteId} {
+        allow read: if true;
+        allow create, update, delete: if isFounder();
+      }
+
+      match /files/{fileId} {
+        allow read: if true;
+        allow create, update, delete: if isFounder();
+      }
     }
   }
 }
