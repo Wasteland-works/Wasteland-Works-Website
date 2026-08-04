@@ -11,8 +11,8 @@ service firebase.storage {
     }
 
     match /project-files/{projectId}/{fileName} {
-      allow read: if true;
-      allow create: if isFounder() && request.resource.size < 25 * 1024 * 1024;
+      allow read: if isFounder();
+      allow create: if isFounder() && request.resource.size <= 600 * 1024 * 1024;
       allow update, delete: if isFounder();
     }
   }

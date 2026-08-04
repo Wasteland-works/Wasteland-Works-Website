@@ -4,8 +4,10 @@ import {
     serverTimestamp, updateDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import {
-    deleteObject, getDownloadURL, ref, uploadBytes
+    deleteObject, getDownloadURL, ref, uploadBytesResumable
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js";
+
+const MAX_UPLOAD_SIZE = 600 * 1024 * 1024;
 
 const projectId = new URLSearchParams(location.search).get("id");
 const elements = Object.fromEntries([
@@ -152,8 +154,8 @@ elements.uploadFileButton.addEventListener("click", async () => {
         showMessage("Choose a file first.", "error");
         return;
     }
-    if (file.size > 25 * 1024 * 1024) {
-        showMessage("Files must be smaller than 25 MB.", "error");
+    if (file.size > MAX_UPLOAD_SIZE) {
+        showMessage("Files must be 600 MB or smaller.", "error");
         return;
     }
     elements.uploadFileButton.disabled = true;
@@ -162,7 +164,15 @@ elements.uploadFileButton.addEventListener("click", async () => {
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
         const storagePath = `project-files/${projectId}/${Date.now()}-${safeName}`;
         const storageReference = ref(storage, storagePath);
-        await uploadBytes(storageReference, file, { contentType: file.type || "application/octet-stream" });
+        const uploadTask = uploadBytesResumable(storageReference, file, {
+            contentType: file.type || "application/octet-stream"
+        });
+        await new Promise((resolve, reject) => {
+            uploadTask.on("state_changed", snapshot => {
+                const percentage = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                elements.uploadFileButton.textContent = `Uploading… ${percentage}%`;
+            }, reject, resolve);
+        });
         const url = await getDownloadURL(storageReference);
         await addDoc(collection(db, "projects", projectId, "files"), {
             name: file.name,
