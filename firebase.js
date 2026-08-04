@@ -3,14 +3,14 @@ import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js";
 
-// This is the Firebase project from the working authentication example.
+// Public web configuration for the official Wasteland Works Firebase project.
 const firebaseConfig = {
-    apiKey: "AIzaSyDkmoyIV57i7Zr7o5VA41y4wl9koiz510",
-    authDomain: "test-auth-6b1c6.firebaseapp.com",
-    projectId: "test-auth-6b1c6",
-    storageBucket: "test-auth-6b1c6.firebasestorage.app",
-    messagingSenderId: "117669694143",
-    appId: "1:117669694143:web:263ab22991e90fe49e140a"
+    apiKey: "AIzaSyCaW7AhM5J_3O0imK07-WoSqp7jJfcsdt8",
+    authDomain: "wasteland-works-official.firebaseapp.com",
+    projectId: "wasteland-works-official",
+    storageBucket: "wasteland-works-official.firebasestorage.app",
+    messagingSenderId: "446534625351",
+    appId: "1:446534625351:web:945bd7583cc686edf26962"
 };
 
 const app = initializeApp(firebaseConfig);
