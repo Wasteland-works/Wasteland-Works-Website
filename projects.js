@@ -2,6 +2,7 @@ import { db } from "./firebase.js";
 import { collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const container = document.getElementById("projectContainer");
+let founderMode = false;
 
 function renderProject(project) {
     const card = document.createElement("article");
@@ -14,6 +15,13 @@ function renderProject(project) {
     const description = document.createElement("p");
     description.textContent = project.description || "No description yet.";
     card.append(heading, description);
+    if (founderMode) {
+        const editLink = document.createElement("a");
+        editLink.className = "button admin-edit-link";
+        editLink.href = `edit-project.html?id=${encodeURIComponent(project.id)}`;
+        editLink.textContent = "Edit project";
+        card.append(editLink);
+    }
     return card;
 }
 
@@ -35,3 +43,10 @@ async function loadProjects() {
 }
 
 loadProjects();
+
+window.addEventListener("admin-status-changed", event => {
+    founderMode = Boolean(event.detail?.isFounder);
+    loadProjects();
+});
+
+window.addEventListener("projects-changed", loadProjects);

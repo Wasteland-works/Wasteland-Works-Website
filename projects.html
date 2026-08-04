@@ -27,6 +27,28 @@
 
         </section>
 
+        <section id="projectAdminTools" class="card admin-tools" hidden>
+            <p class="eyebrow">Founder controls</p>
+            <div class="admin-tools-heading">
+                <div>
+                    <h2>Add a project</h2>
+                    <p>Create a project here and it will appear on this page immediately.</p>
+                </div>
+                <a class="button" href="admin.html">Open full admin panel</a>
+            </div>
+
+            <div class="admin-project-form">
+                <label for="adminProjectTitle">Project title</label>
+                <input id="adminProjectTitle" type="text" required placeholder="What are you building?">
+                <label for="adminProjectDescription">Short description</label>
+                <textarea id="adminProjectDescription" placeholder="A short summary for the project card"></textarea>
+                <label for="adminProjectContent">Project overview</label>
+                <textarea id="adminProjectContent" placeholder="Full project details"></textarea>
+                <button id="adminCreateProject" class="button-solid" type="button">Add project to website</button>
+                <p id="projectAdminMessage" class="form-message" role="status" aria-live="polite"></p>
+            </div>
+        </section>
+
         <div id="projectContainer">
 
             <section class="card">
@@ -41,6 +63,7 @@
 
     <script src="load-layout.js"></script>
     <script type="module" src="projects.js"></script>
+    <script type="module" src="projects-admin.js"></script>
 
 </body>
 
