@@ -91,6 +91,15 @@ label { display: block; margin: 18px 0 7px; color: #d9e0da; font-size: .86rem; f
 .account-message { position: sticky; bottom: 18px; width: fit-content; margin: 18px auto; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-2); box-shadow: 0 15px 40px rgba(0,0,0,.35); }
 .account-message:empty { display: none; }
 
+.entry-list { display: grid; gap: 10px; margin-top: 22px; }
+.project-entry { padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); }
+.project-entry p { margin-bottom: 0; }
+.editable-entry { display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+.editable-entry .button, .editable-entry button { flex: 0 0 auto; margin: 0 !important; }
+.project-image { display: block; max-width: min(100%, 520px); max-height: 480px; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 8px; object-fit: contain; }
+.nested-card { margin: 12px 0 0; background: var(--panel-2); box-shadow: none; }
+.project-heading-card h1 { margin-bottom: 0; }
+
 #site-footer { padding: 28px 20px; border-top: 1px solid rgba(141, 255, 122, .1); color: #707b72; text-align: center; }
 #site-footer p { margin: 3px; }
 ul { line-height: 1.9; }
@@ -117,6 +126,7 @@ ul { line-height: 1.9; }
     .account-heading { align-items: flex-start; gap: 14px; }
     .account-section-heading { flex-direction: column; gap: 15px; }
     .security-actions .button { width: 100%; }
+    .editable-entry { align-items: flex-start; flex-direction: column; }
 }
 
 @media (prefers-reduced-motion: reduce) {

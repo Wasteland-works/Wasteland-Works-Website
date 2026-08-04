@@ -1,29 +1,42 @@
-async function addProject() {
-    const title = document.getElementById("title").value;
-    const description = document.getElementById("description").value;
-    const content = document.getElementById("content").value;
+import { db } from "./firebase.js";
+import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-    if (title.trim() === "") {
-        alert("Project title is required.");
+const titleInput = document.getElementById("title");
+const descriptionInput = document.getElementById("description");
+const contentInput = document.getElementById("content");
+const createButton = document.getElementById("createProjectButton");
+const adminMessage = document.getElementById("adminMessage");
+
+window.addProject = async function () {
+    const title = titleInput.value.trim();
+    if (!title) {
+        adminMessage.textContent = "Project title is required.";
+        adminMessage.className = "form-message error";
         return;
     }
 
-    const { error } = await supabaseClient
-        .from("projects")
-        .insert([
-            {
-                title: title,
-                description: description,
-                content: content
-            }
-        ]);
-
-    if (error) {
-        alert("Error: " + error.message);
-    } else {
-        alert("Project created!");
-        document.getElementById("title").value = "";
-        document.getElementById("description").value = "";
-        document.getElementById("content").value = "";
+    createButton.disabled = true;
+    createButton.textContent = "Creating…";
+    try {
+        await addDoc(collection(db, "projects"), {
+            title,
+            description: descriptionInput.value.trim(),
+            content: contentInput.value.trim(),
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+        titleInput.value = "";
+        descriptionInput.value = "";
+        contentInput.value = "";
+        adminMessage.textContent = "Project created.";
+        adminMessage.className = "form-message success";
+        window.dispatchEvent(new Event("projects-changed"));
+    } catch (error) {
+        console.error(error);
+        adminMessage.textContent = "Couldn’t create the project. Check your Firebase permissions.";
+        adminMessage.className = "form-message error";
+    } finally {
+        createButton.disabled = false;
+        createButton.textContent = "Create project";
     }
-}
+};
