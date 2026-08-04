@@ -12,7 +12,7 @@ onAuthStateChanged(auth, async (user) => {
 
     try {
         const profile = await ensureUserProfile(user);
-        if (profile.role !== "founder") {
+        if (profile.role !== "founder" && profile.membership !== "admin") {
             window.location.replace("account.html?access=denied");
             return;
         }

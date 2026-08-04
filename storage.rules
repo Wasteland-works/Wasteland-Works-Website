@@ -4,7 +4,10 @@ service firebase.storage {
   match /b/{bucket}/o {
     function isFounder() {
       return request.auth != null
-        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == "founder";
+        && (
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == "founder"
+          || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.membership == "admin"
+        );
     }
 
     match /project-files/{projectId}/{fileName} {

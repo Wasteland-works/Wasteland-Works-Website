@@ -20,7 +20,7 @@ onAuthStateChanged(auth, async user => {
     if (user) {
         try {
             const profile = await ensureUserProfile(user);
-            isFounder = profile.role === "founder";
+            isFounder = profile.role === "founder" || profile.membership === "admin";
         } catch (error) {
             console.error(error);
         }
