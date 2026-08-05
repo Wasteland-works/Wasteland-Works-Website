@@ -63,6 +63,8 @@
     box-shadow: 0 0 8px currentColor;
 }
 
+.notification-signal[hidden] { display: none; }
+
 .notification-unread { color: #ff4d4d; background: currentColor; }
 .notification-clear { color: #62d979; background: currentColor; }
 .notification-general { color: #4da3ff; background: currentColor; }
