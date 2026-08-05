@@ -4,7 +4,7 @@ async function loadLayout() {
 
     try {
         const [headerResponse, footerResponse] = await Promise.all([
-            fetch("header.html?v=20260805-notifications"),
+            fetch("header.html?v=20260805-mentions"),
             fetch("footer.html")
         ]);
         if (!headerResponse.ok || !footerResponse.ok) throw new Error("Layout unavailable");
