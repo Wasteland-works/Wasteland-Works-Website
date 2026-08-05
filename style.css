@@ -109,6 +109,13 @@ label { display: block; margin: 18px 0 7px; color: #d9e0da; font-size: .86rem; f
 .admin-project-form .button-solid { justify-self: start; }
 .admin-edit-link { margin-top: 16px; }
 
+.pip-tech-hero { background: radial-gradient(circle at 80% 10%, rgba(232, 168, 58, .16), transparent 36%), linear-gradient(135deg, rgba(141, 255, 122, .08), var(--panel)); }
+.pip-tech-hero h1 { color: #e8a83a; }
+.pip-tech-actions { justify-content: center; flex-wrap: wrap; margin-top: 24px; }
+.pip-tech-actions .button { margin-top: 0; }
+.pip-tech-feature { border-color: rgba(232, 168, 58, .35); background: linear-gradient(135deg, rgba(232, 168, 58, .08), var(--panel)); }
+.pip-tech-feature h2 { color: #e8a83a; }
+
 #site-footer { padding: 28px 20px; border-top: 1px solid rgba(141, 255, 122, .1); color: #707b72; text-align: center; }
 #site-footer p { margin: 3px; }
 ul { line-height: 1.9; }
