@@ -80,6 +80,8 @@ export async function ensureUserProfile(user) {
     }
     if (staffAccess.isCofounder) {
         updates.role = "founder";
+    } else if (staffAccess.isCompanyEmail) {
+        updates.role = "employee";
     }
 
     await setDoc(reference, updates, { merge: true });

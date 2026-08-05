@@ -24,8 +24,9 @@ async function loadLayout() {
             import("https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js")
         ]);
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             const userLinks = document.getElementById("userLinks");
+            const teamMessagesLink = document.getElementById("teamMessagesLink");
             if (!userLinks) return;
 
             if (user) {
@@ -38,6 +39,16 @@ async function loadLayout() {
                     await signOut(auth);
                     window.location.href = "index.html";
                 });
+
+                try {
+                    const { ensureUserProfile } = await import("./profile.js");
+                    const profile = await ensureUserProfile(user);
+                    if (teamMessagesLink && ["founder", "employee"].includes(profile.role)) {
+                        teamMessagesLink.hidden = false;
+                    }
+                } catch (error) {
+                    console.error("Could not check team access.", error);
+                }
             } else {
                 userLinks.innerHTML = '<a class="nav-account" href="login.html">Sign in</a>';
             }

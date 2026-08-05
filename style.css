@@ -12,6 +12,47 @@
     --danger: #ff8787;
 }
 
+.team-page {
+    max-width: 900px;
+    margin-inline: auto;
+}
+
+.team-compose textarea {
+    min-height: 130px;
+    resize: vertical;
+}
+
+.team-message-list {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+
+.team-message {
+    border: 1px solid rgba(118, 217, 104, 0.28);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    background: rgba(4, 12, 7, 0.48);
+}
+
+.team-message-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.65rem;
+}
+
+.team-message-header time {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.team-message p {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
 * { box-sizing: border-box; }
 html { color-scheme: dark; }
 body { min-height: 100vh; margin: 0; background: radial-gradient(circle at 50% -20%, #17261b 0, transparent 38%), var(--bg); color: var(--text); font-family: "DM Sans", Arial, sans-serif; line-height: 1.6; }

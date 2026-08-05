@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Private Wasteland Works team messages.">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Team Messages | Wasteland Works</title>
+    <link rel="stylesheet" href="style.css?v=20260805-team">
+</head>
+<body>
+    <div id="site-header"></div>
+
+    <main class="team-page">
+        <section id="accessStatus" class="card">
+            <h1>Team messages</h1>
+            <p id="accessMessage">Checking your team access…</p>
+        </section>
+
+        <div id="teamBoard" hidden>
+            <section class="card team-compose">
+                <p class="eyebrow">Private workspace</p>
+                <h1>Team messages</h1>
+                <p class="muted">Visible only to Wasteland Works cofounders and employees.</p>
+                <label for="messageBody">New message</label>
+                <textarea id="messageBody" maxlength="4000" placeholder="Share an update with the team"></textarea>
+                <div class="form-actions">
+                    <button id="postMessage" class="button button-solid" type="button">Post message</button>
+                </div>
+                <p id="messageStatus" class="form-message" role="status" aria-live="polite"></p>
+            </section>
+
+            <section class="card">
+                <h2>Latest updates</h2>
+                <div id="messageList" class="team-message-list">
+                    <p class="muted">Loading messages…</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="site-footer"></div>
+    <script src="load-layout.js"></script>
+    <script type="module" src="messages.js"></script>
+</body>
+</html>

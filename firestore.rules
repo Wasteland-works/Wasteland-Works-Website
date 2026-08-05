@@ -18,6 +18,11 @@ service cloud.firestore {
         );
     }
 
+    function isTeamMember() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ["founder", "employee"];
+    }
+
     function hasDownloadAccess() {
       return signedIn()
         && (
@@ -53,6 +58,7 @@ service cloud.firestore {
         && (
           request.resource.data.role == resource.data.role
           || (request.resource.data.role == "founder" && isApprovedCofounderEmail())
+          || (request.resource.data.role == "employee" && hasVerifiedCompanyEmail() && !isApprovedCofounderEmail())
         );
     }
 
@@ -89,6 +95,19 @@ service cloud.firestore {
         allow read: if hasDownloadAccess();
         allow create, update, delete: if isFounder();
       }
+    }
+
+    match /teamMessages/{messageId} {
+      allow read: if isTeamMember();
+      allow create: if isTeamMember()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.authorName is string
+        && request.resource.data.body is string
+        && request.resource.data.body.size() > 0
+        && request.resource.data.body.size() <= 4000;
+      allow update: if false;
+      allow delete: if isTeamMember()
+        && (resource.data.authorId == request.auth.uid || isFounder());
     }
   }
 }

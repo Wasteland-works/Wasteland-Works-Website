@@ -13,6 +13,12 @@ const button = document.getElementById("loginButton");
 const reset = document.getElementById("resetPassword");
 const message = document.getElementById("message");
 let signingIn = false;
+const requestedPage = new URLSearchParams(window.location.search).get("return");
+const safeDestinations = {
+    admin: "admin.html",
+    messages: "messages.html"
+};
+const destination = safeDestinations[requestedPage] || "account.html";
 
 const errors = {
     "auth/invalid-credential": "That email or password doesn’t look right.",
@@ -36,7 +42,7 @@ form.addEventListener("submit", async (event) => {
     try {
         const credential = await signInWithEmailAndPassword(auth, email.value.trim(), password.value);
         await ensureUserProfile(credential.user);
-        window.location.replace("account.html");
+        window.location.replace(destination);
     } catch (error) {
         console.error(error);
         signingIn = false;
@@ -61,5 +67,5 @@ reset.addEventListener("click", async () => {
 });
 
 onAuthStateChanged(auth, (user) => {
-    if (user && !signingIn) window.location.replace("account.html");
+    if (user && !signingIn) window.location.replace(destination);
 });
