@@ -1,0 +1,9 @@
+{
+  "name": "Cascade Failure by Pip Tech",
+  "short_name": "Cascade Failure",
+  "description": "Official Cascade Failure game development log by Pip Tech, the game and engine branch of Wasteland Works, powered by PIP Core.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b0d0c",
+  "theme_color": "#0b0d0c"
+}

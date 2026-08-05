@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Official development log for Cascade Failure, a post-apocalyptic RPG by Pip Tech—the game and engine branch of Wasteland Works—powered by PIP Core.">
+  <meta name="keywords" content="Cascade Failure game, Cascade Failure Pip Tech, PIP Core engine, Wasteland Works game, post-apocalyptic RPG, vault builder game, indie game development, custom game engine, Mac game development">
+  <meta name="author" content="Pip Tech">
+  <meta name="creator" content="Pip Tech">
+  <meta name="publisher" content="Pip Tech, a Wasteland Works division">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow">
+  <meta name="theme-color" content="#0b0d0c">
+  <meta name="application-name" content="Cascade Failure by Pip Tech">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Cascade Failure by Pip Tech">
+  <meta property="og:title" content="Cascade Failure by Pip Tech — Official Development Log">
+  <meta property="og:description" content="Follow Cascade Failure, an original post-apocalyptic RPG by Pip Tech, the game and engine branch of Wasteland Works, powered by PIP Core.">
+  <meta property="og:image" content="assets/powered-armour-refined.jpg">
+  <meta property="og:image:alt" content="Industrial powered armour developed for Cascade Failure by Pip Tech">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Cascade Failure by Pip Tech — Official Development Log">
+  <meta name="twitter:description" content="A post-apocalyptic RPG by Pip Tech, the game and engine branch of Wasteland Works, powered by PIP Core.">
+  <meta name="twitter:image" content="assets/powered-armour-refined.jpg">
+  <link rel="manifest" href="site.webmanifest">
+  <title>Cascade Failure by Pip Tech — Official Game Development Log</title>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "#pip-tech",
+        "name": "Pip Tech",
+        "description": "The game development and engine technology branch of Wasteland Works; developer of Cascade Failure and PIP Core.",
+        "parentOrganization": { "@id": "#wasteland-works" }
+      },
+      {
+        "@type": "Organization",
+        "@id": "#wasteland-works",
+        "name": "Wasteland Works",
+        "description": "Parent organisation of Pip Tech and the wider creative home of Cascade Failure."
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "#pip-core-engine",
+        "name": "PIP Core",
+        "alternateName": "PIP Core Game Engine",
+        "applicationCategory": "Game engine",
+        "author": { "@id": "#pip-tech" },
+        "description": "The custom game engine and authoring technology powering Cascade Failure."
+      },
+      {
+        "@type": "VideoGame",
+        "@id": "#cascade-failure-game",
+        "name": "Cascade Failure",
+        "alternateName": "Cascade Failure by Pip Tech",
+        "description": "An original post-apocalyptic role-playing game with exploration, companions, a modular vault builder and the custom PIP Core engine.",
+        "author": { "@id": "#pip-tech" },
+        "publisher": { "@id": "#pip-tech" },
+        "producer": { "@id": "#wasteland-works" },
+        "softwareRequirements": "PIP Core game engine",
+        "genre": ["Post-apocalyptic role-playing game", "First-person role-playing game", "World-building game"],
+        "gamePlatform": ["macOS", "Windows", "Linux", "SteamOS"],
+        "applicationCategory": "Game",
+        "operatingSystem": ["macOS", "Windows", "Linux", "SteamOS"],
+        "developmentStatus": "Pre-alpha"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "#cascade-failure-development-log",
+        "name": "Cascade Failure by Pip Tech — Official Development Log",
+        "description": "The official visual development history of Cascade Failure by Pip Tech, the game and engine branch of Wasteland Works.",
+        "about": { "@id": "#cascade-failure-game" },
+        "publisher": { "@id": "#pip-tech" },
+        "dateModified": "2026-08-04",
+        "inLanguage": "en-GB"
+      }
+    ]
+  }
+  </script>
+  <style>
+    :root { --ink:#e9e4d8; --muted:#aba596; --black:#0b0d0c; --panel:#151815; --line:#30372e; --amber:#e8a83a; --green:#75d787; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; color:var(--ink); background:var(--black); font-family:Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height:1.6; }
+    a { color:inherit; }
+    img { display:block; width:100%; }
+    .wrap { width:min(1180px, calc(100% - 40px)); margin:auto; }
+    header { min-height:72vh; display:grid; align-items:end; position:relative; overflow:hidden; border-bottom:1px solid var(--line); background:linear-gradient(90deg, rgba(8,10,8,.95) 0%,rgba(8,10,8,.64) 52%,rgba(8,10,8,.25)), url('assets/powered-armour-refined.jpg') 70% 38%/cover; }
+    header::after { content:""; position:absolute; inset:0; background:linear-gradient(0deg,var(--black),transparent 38%); pointer-events:none; }
+    .hero { position:relative; z-index:1; padding:110px 0 72px; max-width:760px; }
+    .eyebrow,.stamp { color:var(--green); font:700 .78rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.2em; text-transform:uppercase; }
+    h1 { margin:.18em 0 0; font-size:clamp(4.2rem,14vw,10rem); line-height:.83; letter-spacing:-.075em; color:var(--amber); }
+    .lead { max-width:680px; margin:28px 0 0; font-size:clamp(1.1rem,2vw,1.45rem); color:#f1eee4; }
+    nav { position:absolute; z-index:2; top:0; left:0; right:0; padding:24px 0; }
+    nav .wrap { display:flex; justify-content:space-between; align-items:center; }
+    .brand { font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
+    .navlink { color:var(--muted); text-decoration:none; font-size:.88rem; }
+    .navlinks { display:flex; gap:22px; }
+    main section { padding:90px 0; border-bottom:1px solid var(--line); }
+    .intro { display:grid; grid-template-columns:1.1fr .9fr; gap:64px; align-items:start; }
+    h2 { margin:0 0 20px; font-size:clamp(2rem,5vw,4.3rem); line-height:1; letter-spacing:-.045em; }
+    h3 { margin:0 0 10px; font-size:1.35rem; }
+    p { margin:0 0 1em; }
+    .muted { color:var(--muted); }
+    .facts { display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+    .fact { padding:24px; background:var(--panel); }
+    .fact strong { display:block; color:var(--amber); font-size:1.5rem; }
+    .timeline { display:grid; gap:26px; }
+    .entry { display:grid; grid-template-columns:170px 1fr; gap:42px; }
+    .entry + .entry { padding-top:34px; border-top:1px solid var(--line); }
+    .entry .phase { color:var(--amber); font:700 .82rem ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.12em; text-transform:uppercase; }
+    .entry p:last-child { margin-bottom:0; }
+    .gallery { display:grid; grid-template-columns:repeat(12,1fr); gap:18px; margin-top:40px; }
+    figure { margin:0; background:var(--panel); border:1px solid var(--line); overflow:hidden; }
+    figure.wide { grid-column:span 12; }
+    figure.half { grid-column:span 6; }
+    figure.third { grid-column:span 4; }
+    figure img { aspect-ratio:16/10; object-fit:cover; background:#050605; }
+    figure.portrait img { aspect-ratio:4/5; object-fit:contain; }
+    figcaption { padding:16px 18px 18px; color:var(--muted); font-size:.9rem; }
+    figcaption strong { display:block; color:var(--ink); font-size:1rem; }
+    .notice { padding:28px; border:1px solid #524624; background:#18160f; color:#c9c2ac; }
+    footer { padding:48px 0; color:var(--muted); font-size:.9rem; }
+    footer .wrap { display:flex; justify-content:space-between; gap:30px; }
+    @media (max-width:760px) {
+      .wrap { width:min(100% - 26px,1180px); }
+      header { min-height:630px; background-position:62% 50%; }
+      .intro,.entry { grid-template-columns:1fr; gap:20px; }
+      figure.half,figure.third { grid-column:span 12; }
+      main section { padding:64px 0; }
+      footer .wrap { display:block; }
+    }
+  </style>
+</head>
+<body>
+  <nav><div class="wrap"><div class="brand">Pip Tech × Wasteland Works</div><div class="navlinks"><a class="navlink" href="#world">World</a><a class="navlink" href="#progress">Development log ↓</a></div></div></nav>
+  <header>
+    <div class="wrap hero">
+      <div class="eyebrow">Project development archive · 2026</div>
+      <h1>CASCADE<br>FAILURE</h1>
+      <div class="eyebrow">A game by Pip Tech · A Wasteland Works division</div>
+      <p class="lead">An original post-apocalyptic RPG and world builder powered by the custom PIP Core engine—built in public, one stubborn experiment at a time.</p>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="wrap intro">
+        <div>
+          <div class="stamp">Field report 001</div>
+          <h2>Cascade Failure by Pip Tech: from a bare-metal prototype to a living world.</h2>
+          <p>Cascade Failure began as a deceptively simple challenge: make a self-contained 3D game that could launch directly on a Mac. The project rapidly grew into something larger—a playable RPG prototype, a modular vault and world editor, a reusable character pipeline and PIP Core, Pip Tech’s own game engine. Pip Tech is the dedicated game and engine branch of Wasteland Works.</p>
+          <p class="muted">This public log records the visible journey without revealing story material, private character sheets or unannounced narrative details.</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><strong>3D</strong>Playable exploration</div>
+          <div class="fact"><strong>PIP Core</strong>Custom game engine</div>
+          <div class="fact"><strong>Modular</strong>Vault construction</div>
+          <div class="fact"><strong>Rigged</strong>Runtime characters</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="world">
+      <div class="wrap intro">
+        <div>
+          <div class="stamp">From the recovered record</div>
+          <h2>The world did not end in a war.</h2>
+          <p>Humanity entered its final energy crisis slowly. Conventional nuclear fuel was being consumed faster than it could be replaced, while generations of radioactive waste accumulated beneath an increasingly power-hungry civilisation.</p>
+          <p>Atom Corp believed it had found a responsible answer. Its seventeenth experimental material—A17—could remain dormant until activation, power compact reactors for years and leave almost nothing behind. Buildings, industries and shelters adopted the networked system faster than the old infrastructure could be retired.</p>
+          <p>Then one reactor disappeared from the network.</p>
+          <p class="muted">What followed became known as the Cascade: a sequence of failures that crossed cities and borders faster than any government could understand. Surviving records contain an unexplained two-hour interruption—just long enough for part of humanity to reach shelter. Who created that window, and why the system resumed, are questions buried inside the world of Cascade Failure.</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><strong>A17</strong>Dormant until activated</div>
+          <div class="fact"><strong>10 years</strong>Designed fuel life</div>
+          <div class="fact"><strong>Networked</strong>Compact reactor fleet</div>
+          <div class="fact"><strong>02:00:00</strong>Unexplained interruption</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="progress">
+      <div class="wrap">
+        <div class="stamp">The build history</div>
+        <h2>Progress, not perfection.</h2>
+        <div class="timeline">
+          <article class="entry"><div class="phase">Phase 01<br>First playable</div><div><h3>The room where it started</h3><p>The earliest Cascade Failure build proved the core loop: first-person movement, aiming, interaction, dialogue, weapons, health and a working interface inside a hand-built 3D renderer. That technology evolved into the PIP Core engine. The geometry was deliberately primitive; the important result was that the game existed and could be played.</p></div></article>
+          <article class="entry"><div class="phase">Phase 02<br>Systems</div><div><h3>A game begins to form</h3><p>Saving, companion selection, doors, inventory, weapon hotkeys, ambient NPC dialogue and the wrist-mounted PID Companion were layered onto the prototype. The PID became Cascade Failure’s own diegetic interface and targeting assistant rather than an imitation of another game’s device.</p></div></article>
+          <article class="entry"><div class="phase">Phase 03<br>World building</div><div><h3>The vault editor becomes a game of its own</h3><p>A grid editor grew into a modular world-building tool with exterior terrain, vault entrances, automatic floors and walls, interior partitions, room zones, furniture placement, NPC occupations, 3D walkthroughs and a dedicated development vault. The long-term goal is to let players construct and inhabit multiple vaults across the wasteland.</p></div></article>
+          <article class="entry"><div class="phase">Phase 04<br>Characters</div><div><h3>Replacing primitives with performers</h3><p>Characters moved from assembled shapes to higher-density humanoid meshes. A common skeleton and animation contract now supports walking, running, combat tests, inverse kinematics, equipment sockets and future facial animation. The current Jessica runtime stands at a verified 1.65 metres and retains its animation data inside the editor.</p></div></article>
+          <article class="entry"><div class="phase">Phase 05<br>Equipment</div><div><h3>Clothing and machinery</h3><p>Reusable clothing was developed as real removable geometry, not painted-on colour. Lab-coat tailoring led into fitted vault suits and layered armour. In parallel, powered armour evolved from a rough silhouette into a full industrial machine built around an internal frame and removable protective sections.</p></div></article>
+          <article class="entry"><div class="phase">Now<br>Integration</div><div><h3>Bringing the pieces together</h3><p>The present work centres on integrating the higher-fidelity animated cast into the Map Builder, improving environmental terrain and preparing a clean asset pipeline that can eventually target macOS, SteamOS/Linux and Windows. Cascade Failure remains in active development; everything shown here is work in progress.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="stamp">Visual archive</div>
+        <h2>The journey in pictures.</h2>
+        <div class="gallery">
+          <figure class="wide"><img src="assets/ashfall-gameplay-prototype.jpg" alt="Early first-person Cascade Failure gameplay prototype"><figcaption><strong>Early playable prototype</strong>Primitive NPCs inside the original vault test room, with dialogue, crosshair and survival HUD already operational.</figcaption></figure>
+          <figure class="half"><img src="assets/ashfall-title-screen.jpg" alt="Legacy AshFall working-title screen"><figcaption><strong>Former working title — AshFall 5.2</strong>The native Mac build’s title screen during the custom-renderer era, before the project became Cascade Failure.</figcaption></figure>
+          <figure class="half"><img src="assets/ashfall-character-runtime.jpg" alt="Early runtime character in Cascade Failure"><figcaption><strong>Runtime character milestone</strong>An intermediate character model running inside the playable build—an important bridge between shape-based residents and skeletal characters.</figcaption></figure>
+          <figure class="half portrait"><img src="assets/jessica-walk-contact.jpg" alt="Jessica rig walking at contact pose"><figcaption><strong>Jessica — walk contact</strong>The current 1.65 m character rig at a contact frame, carrying a separate rigid hip tool.</figcaption></figure>
+          <figure class="half portrait"><img src="assets/jessica-walk-passing.jpg" alt="Jessica rig walking at passing pose"><figcaption><strong>Jessica — walk passing</strong>A second frame confirms skeletal deformation and equipment attachment through the stride.</figcaption></figure>
+          <figure class="half portrait"><img src="assets/labcoat-front.jpg" alt="Tailored lab coat front development render"><figcaption><strong>Removable clothing study</strong>Front tailoring and material tests for a rig-compatible lab coat.</figcaption></figure>
+          <figure class="half portrait"><img src="assets/labcoat-back.jpg" alt="Tailored lab coat rear development render"><figcaption><strong>All-round fit</strong>Rear construction and silhouette work, designed to remain a distinct garment.</figcaption></figure>
+          <figure class="third portrait"><img src="assets/powered-armour-blockout.jpg" alt="Early powered armour blockout"><figcaption><strong>Armour blockout</strong>Establishing scale and mechanical proportions.</figcaption></figure>
+          <figure class="third portrait"><img src="assets/powered-armour-refined.jpg" alt="Refined powered armour front render"><figcaption><strong>Industrial refinement</strong>A later front render with layered plating, joints and service details.</figcaption></figure>
+          <figure class="third portrait"><img src="assets/powered-armour-rear.jpg" alt="Refined powered armour rear render"><figcaption><strong>Rear systems</strong>Back plating and machinery developed as part of the same wearable frame.</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="notice"><strong>Development notice:</strong> Cascade Failure is an original Pip Tech project, produced under parent organisation Wasteland Works and powered by PIP Core. It remains in active pre-alpha development. Designs, interfaces, names and features may change. Images are development captures and do not represent final quality. No release date has been announced.</div>
+      </div>
+    </section>
+  </main>
+  <footer><div class="wrap"><span>© 2026 Pip Tech and Wasteland Works. All rights reserved.<br><small>Codex was used for smart website design.</small></span><span>Cascade Failure · Powered by PIP Core · Updated 4 August 2026</span></div></footer>
+</body>
+</html>

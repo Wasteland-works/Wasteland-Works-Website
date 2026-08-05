@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Add the live sitemap address after the final public domain is known, for example:
+# Sitemap: https://YOUR-DOMAIN.example/sitemap.xml
