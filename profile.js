@@ -11,6 +11,7 @@ function fallbackUsername(user) {
 }
 
 const cofounderEmails = new Set([
+    "lee@wasteland-works.com",
     "ethan@wasteland-works.com",
     "ren@wasteland-works.com",
     "yodhivah@wasteland-works.com"

@@ -41,6 +41,7 @@ service cloud.firestore {
     function isApprovedCofounderEmail() {
       return hasVerifiedCompanyEmail()
         && request.auth.token.email in [
+          "lee@wasteland-works.com",
           "ethan@wasteland-works.com",
           "ren@wasteland-works.com",
           "yodhivah@wasteland-works.com"
