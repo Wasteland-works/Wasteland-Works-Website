@@ -47,8 +47,8 @@ main { width: min(1000px, calc(100% - 32px)); margin: 0 auto; padding: 42px 0 60
 .button, button:not(.menu-toggle):not(.nav-logout):not(.text-link) { display: inline-block; min-height: 44px; margin-top: 12px; padding: 10px 20px; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: var(--green); cursor: pointer; font-weight: 700; text-decoration: none; transition: background .18s, color .18s, transform .18s; }
 .button:hover, button:not(.menu-toggle):not(.nav-logout):not(.text-link):hover { background: rgba(141, 255, 122, .1); transform: translateY(-1px); }
 .button:disabled, button:disabled { cursor: wait; opacity: .55; }
-.button-solid { border-color: var(--green-bright); background: var(--green-bright); color: #071009; }
-.button-solid:hover { background: #57ff92; color: #071009; }
+.button-solid, .card a.button-solid { border-color: #76d968; background: #76d968; color: #071009; }
+.button-solid:hover, .card a.button-solid:hover { border-color: #91ea83; background: #91ea83; color: #071009; }
 .danger-button { border-color: rgba(255, 135, 135, .35); color: var(--danger); }
 
 input, textarea { width: 100%; padding: 12px 14px; border: 1px solid rgba(141, 255, 122, .18); border-radius: 8px; outline: 0; background: #0c100d; color: var(--text); }
@@ -115,6 +115,10 @@ label { display: block; margin: 18px 0 7px; color: #d9e0da; font-size: .86rem; f
 .pip-tech-actions .button { margin-top: 0; }
 .pip-tech-feature { border-color: rgba(232, 168, 58, .35); background: linear-gradient(135deg, rgba(232, 168, 58, .08), var(--panel)); }
 .pip-tech-feature h2 { color: #e8a83a; }
+.pip-tech-hero .button-solid, .pip-tech-feature .button-solid,
+.pip-tech-hero a.button-solid, .pip-tech-feature a.button-solid { border-color: #c98b2d; background: #c98b2d; color: #130e07; text-shadow: none; }
+.pip-tech-hero .button-solid:hover, .pip-tech-feature .button-solid:hover,
+.pip-tech-hero a.button-solid:hover, .pip-tech-feature a.button-solid:hover { border-color: #e8a83a; background: #e8a83a; color: #130e07; }
 
 #site-footer { padding: 28px 20px; border-top: 1px solid rgba(141, 255, 122, .1); color: #707b72; text-align: center; }
 #site-footer p { margin: 3px; }
