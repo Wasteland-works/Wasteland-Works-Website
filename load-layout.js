@@ -19,7 +19,7 @@ async function loadLayout() {
             menuToggle.setAttribute("aria-expanded", String(open));
         });
 
-        const [{ auth }, { onAuthStateChanged, signOut }] = await Promise.all([
+        const [{ auth, db }, { onAuthStateChanged, signOut }] = await Promise.all([
             import("./firebase.js"),
             import("https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js")
         ]);
@@ -41,10 +41,20 @@ async function loadLayout() {
                 });
 
                 try {
-                    const { ensureUserProfile } = await import("./profile.js");
-                    const profile = await ensureUserProfile(user);
+                    const { getUserProfile } = await import("./profile.js?v=20260805-team");
+                    const profile = await getUserProfile(user.uid);
                     if (teamMessagesLink && ["founder", "employee"].includes(profile.role)) {
                         teamMessagesLink.hidden = false;
+                        const { collection, limit, onSnapshot, query, where } = await import("https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js");
+                        const unreadQuery = query(collection(db, "teamMessages"), where("recipientId", "==", user.uid), limit(50));
+                        onSnapshot(unreadQuery, snapshot => {
+                            const hasUnread = snapshot.docs.some(item => !item.data().readAt && item.data().authorId !== user.uid);
+                            const signal = document.getElementById("teamNotificationSignal");
+                            if (!signal) return;
+                            signal.className = `notification-signal ${hasUnread ? "notification-unread" : "notification-clear"}`;
+                            signal.title = hasUnread ? "You have an unread team mention" : "No unread mentions";
+                            signal.setAttribute("aria-label", signal.title);
+                        });
                     }
                 } catch (error) {
                     console.error("Could not check team access.", error);

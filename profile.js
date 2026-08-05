@@ -28,7 +28,7 @@ function verifiedStaffAccess(user) {
 export async function ensureUserProfile(user) {
     if (!user) throw new Error("A signed-in user is required.");
 
-    if ((user.email || "").toLowerCase().endsWith("@wasteland-works.com")) {
+    if ((user.email || "").toLowerCase().endsWith("@wasteland-works.com") && !user.emailVerified) {
         await reload(user);
         await user.getIdToken(true);
     }

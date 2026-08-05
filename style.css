@@ -53,6 +53,32 @@
     overflow-wrap: anywhere;
 }
 
+.notification-signal {
+    display: inline-block;
+    width: 0.68rem;
+    height: 0.68rem;
+    margin-left: 0.25rem;
+    border-radius: 50%;
+    vertical-align: middle;
+    box-shadow: 0 0 8px currentColor;
+}
+
+.notification-unread { color: #ff4d4d; background: currentColor; }
+.notification-clear { color: #62d979; background: currentColor; }
+.notification-general { color: #4da3ff; background: currentColor; }
+
+.team-message-header > div {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.team-message-recipient {
+    margin-top: 0.6rem !important;
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
 * { box-sizing: border-box; }
 html { color-scheme: dark; }
 body { min-height: 100vh; margin: 0; background: radial-gradient(circle at 50% -20%, #17261b 0, transparent 38%), var(--bg); color: var(--text); font-family: "DM Sans", Arial, sans-serif; line-height: 1.6; }

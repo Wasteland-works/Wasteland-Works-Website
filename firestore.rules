@@ -98,16 +98,51 @@ service cloud.firestore {
     }
 
     match /teamMessages/{messageId} {
-      allow read: if isTeamMember();
+      allow read: if isTeamMember()
+        && (
+          resource.data.kind == "update"
+          || resource.data.recipientId == request.auth.uid
+          || resource.data.authorId == request.auth.uid
+        );
       allow create: if isTeamMember()
+        && request.resource.data.keys().hasOnly([
+          "authorId", "authorName", "body", "kind", "recipientId", "recipientName",
+          "recipientEmail", "readAt", "emailStatus", "createdAt"
+        ])
         && request.resource.data.authorId == request.auth.uid
         && request.resource.data.authorName is string
+        && request.resource.data.authorName.size() > 0
+        && request.resource.data.authorName.size() <= 120
         && request.resource.data.body is string
         && request.resource.data.body.size() > 0
-        && request.resource.data.body.size() <= 4000;
-      allow update: if false;
+        && request.resource.data.body.size() <= 4000
+        && request.resource.data.kind in ["update", "gotIt"]
+        && (request.resource.data.kind == "update" || request.resource.data.recipientId is string)
+        && request.resource.data.readAt == null
+        && request.resource.data.emailStatus in ["pending", "not-needed"]
+        && request.resource.data.createdAt == request.time;
+      allow update: if isTeamMember()
+        && resource.data.recipientId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["readAt"])
+        && request.resource.data.readAt == request.time;
       allow delete: if isTeamMember()
-        && (resource.data.authorId == request.auth.uid || isFounder());
+        && (
+          resource.data.authorId == request.auth.uid
+          || isFounder()
+          || (resource.data.kind == "gotIt" && resource.data.recipientId == request.auth.uid)
+        );
+    }
+
+    match /teamDirectory/{userId} {
+      allow read: if isTeamMember();
+      allow create, update: if isTeamMember()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(["uid", "displayName", "email", "role", "updatedAt"])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.role in ["founder", "employee"]
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
     }
   }
 }
