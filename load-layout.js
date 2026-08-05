@@ -51,8 +51,9 @@ async function loadLayout() {
                             const hasUnread = snapshot.docs.some(item => !item.data().readAt && item.data().authorId !== user.uid);
                             const signal = document.getElementById("teamNotificationSignal");
                             if (!signal) return;
-                            signal.className = `notification-signal ${hasUnread ? "notification-unread" : "notification-clear"}`;
-                            signal.title = hasUnread ? "You have an unread team mention" : "No unread mentions";
+                            signal.hidden = !hasUnread;
+                            signal.className = "notification-signal notification-unread";
+                            signal.title = "You have an unread team mention";
                             signal.setAttribute("aria-label", signal.title);
                         });
                     }

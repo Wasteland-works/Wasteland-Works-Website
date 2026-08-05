@@ -25,6 +25,20 @@ function verifiedStaffAccess(user) {
     };
 }
 
+async function syncTeamDirectory(user, profile) {
+    if (!["founder", "employee"].includes(profile.role)) return;
+    const username = profile.username || profile.displayName || user.email?.split("@")[0] || "team-member";
+    await setDoc(doc(db, "teamDirectory", user.uid), {
+        uid: user.uid,
+        username,
+        usernameLower: username.toLowerCase(),
+        displayName: profile.displayName || username,
+        email: user.email || "",
+        role: profile.role,
+        updatedAt: serverTimestamp()
+    }, { merge: true });
+}
+
 export async function ensureUserProfile(user) {
     if (!user) throw new Error("A signed-in user is required.");
 
@@ -85,8 +99,9 @@ export async function ensureUserProfile(user) {
     }
 
     await setDoc(reference, updates, { merge: true });
-
-    return (await getDoc(reference)).data();
+    const savedProfile = (await getDoc(reference)).data();
+    await syncTeamDirectory(user, savedProfile);
+    return savedProfile;
 }
 
 export async function getUserProfile(uid) {

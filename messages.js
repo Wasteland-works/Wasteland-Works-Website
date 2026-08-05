@@ -20,7 +20,6 @@ const accessStatus = document.getElementById("accessStatus");
 const accessMessage = document.getElementById("accessMessage");
 const teamBoard = document.getElementById("teamBoard");
 const messageType = document.getElementById("messageType");
-const messageRecipient = document.getElementById("messageRecipient");
 const recipientHint = document.getElementById("recipientHint");
 const messageBody = document.getElementById("messageBody");
 const postButton = document.getElementById("postMessage");
@@ -31,6 +30,7 @@ let currentUser = null;
 let currentProfile = null;
 let updateMessages = [];
 let privateMessages = [];
+let directoryMembers = [];
 const listeners = [];
 
 function isTeamMember(profile) {
@@ -138,48 +138,46 @@ function renderMessages() {
 }
 
 function fillDirectory(snapshot) {
-    const selected = messageRecipient.value;
-    messageRecipient.length = 1;
-    snapshot.forEach(memberSnapshot => {
-        if (memberSnapshot.id === currentUser.uid) return;
-        const member = memberSnapshot.data();
-        const option = document.createElement("option");
-        option.value = memberSnapshot.id;
-        option.textContent = `${member.displayName} — ${member.role}`;
-        option.dataset.name = member.displayName;
-        option.dataset.email = member.email;
-        messageRecipient.append(option);
-    });
-    messageRecipient.value = selected;
+    directoryMembers = snapshot.docs.map(memberSnapshot => ({ id: memberSnapshot.id, ...memberSnapshot.data() }));
 }
 
 function updateMessageTypeHelp() {
     const directOnly = messageType.value === "gotIt";
-    if (directOnly && !messageRecipient.value) {
-        recipientHint.textContent = "A Got it message needs one named recipient and disappears when they acknowledge it.";
-    } else if (directOnly) {
-        recipientHint.textContent = "Only the selected person will see this message. It disappears when they press Got it.";
-    } else if (messageRecipient.value) {
-        recipientHint.textContent = "This permanent update stays on the board; the recipient’s red notification turns green when read.";
-    } else {
-        recipientHint.textContent = "General updates are shown to the whole team with a blue signal.";
-    }
+    recipientHint.textContent = directOnly
+        ? "A Got it message needs an @username. Only that person sees it, and it disappears when acknowledged."
+        : "Type @username to notify someone, or leave out the mention for a blue general update.";
 }
 
 messageType.addEventListener("change", updateMessageTypeHelp);
-messageRecipient.addEventListener("change", updateMessageTypeHelp);
+
+function resolveMention(body) {
+    const matches = [...body.matchAll(/(?:^|\s)@([a-z0-9._-]+)/gi)];
+    if (!matches.length) return { member: null, mentionFound: false };
+    const requested = matches[0][1].toLowerCase();
+    const member = directoryMembers.find(item =>
+        item.usernameLower === requested
+        || String(item.username || "").toLowerCase() === requested
+        || String(item.displayName || "").toLowerCase().replace(/\s+/g, "") === requested.replace(/\s+/g, "")
+    );
+    return { member: member || null, mentionFound: true };
+}
 
 postButton.addEventListener("click", async () => {
     const body = messageBody.value.trim();
-    const recipientOption = messageRecipient.selectedOptions[0];
-    const recipientId = messageRecipient.value || null;
+    const mention = resolveMention(body);
+    const recipientId = mention.member?.id || null;
     if (!body) {
         messageStatus.textContent = "Write a message before posting.";
         messageStatus.className = "form-message error";
         return;
     }
+    if (mention.mentionFound && !recipientId) {
+        messageStatus.textContent = "That @username is not registered as a Wasteland Works team account.";
+        messageStatus.className = "form-message error";
+        return;
+    }
     if (messageType.value === "gotIt" && !recipientId) {
-        messageStatus.textContent = "Choose who should receive this Got it message.";
+        messageStatus.textContent = "Add the recipient’s @username to this Got it message.";
         messageStatus.className = "form-message error";
         return;
     }
@@ -193,8 +191,8 @@ postButton.addEventListener("click", async () => {
             body,
             kind: messageType.value,
             recipientId,
-            recipientName: recipientId ? recipientOption.dataset.name : null,
-            recipientEmail: recipientId ? recipientOption.dataset.email : null,
+            recipientName: recipientId ? mention.member.displayName : null,
+            recipientEmail: recipientId ? mention.member.email : null,
             readAt: null,
             emailStatus: recipientId ? "pending" : "not-needed",
             createdAt: serverTimestamp()
@@ -244,6 +242,8 @@ onAuthStateChanged(auth, async user => {
 
         await setDoc(doc(db, "teamDirectory", user.uid), {
             uid: user.uid,
+            username: currentProfile.username || currentProfile.displayName || user.email.split("@")[0],
+            usernameLower: (currentProfile.username || currentProfile.displayName || user.email.split("@")[0]).toLowerCase(),
             displayName: currentProfile.displayName || currentProfile.username || user.email,
             email: user.email,
             role: currentProfile.role,

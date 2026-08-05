@@ -137,9 +137,11 @@ service cloud.firestore {
       allow read: if isTeamMember();
       allow create, update: if isTeamMember()
         && request.auth.uid == userId
-        && request.resource.data.keys().hasOnly(["uid", "displayName", "email", "role", "updatedAt"])
+        && request.resource.data.keys().hasOnly(["uid", "username", "usernameLower", "displayName", "email", "role", "updatedAt"])
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.email == request.auth.token.email
+        && request.resource.data.username is string
+        && request.resource.data.usernameLower is string
         && request.resource.data.role in ["founder", "employee"]
         && request.resource.data.updatedAt == request.time;
       allow delete: if false;
