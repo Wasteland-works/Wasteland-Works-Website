@@ -47,8 +47,15 @@
             <input id="fileType" type="text" value="application/zip">
             <label for="fileSize">File size in bytes (optional)</label>
             <input id="fileSize" type="number" min="0">
+            <label for="resourceKey">Access category</label>
+            <select id="resourceKey">
+                <option value="authentication-template">Authentication template — visitors and above</option>
+                <option value="pipboy-3000">Pip-Boy 3000 — members and above</option>
+                <option value="vault-os">Vault OS — supporters and above</option>
+                <option value="esp-boy">ESP Boy — premium and above</option>
+            </select>
             <button id="addFileButton" type="button">Add protected download</button>
-            <p class="muted">Only authorised members receive a short-lived download link. Removing an entry here does not delete the original release file.</p>
+            <p class="muted">Access is controlled centrally by membership tier. Removing an entry here does not delete the original release file.</p>
             <div id="fileList" class="entry-list">Loading files…</div>
         </section>
 
@@ -56,6 +63,6 @@
     </main>
 
     <script type="module" src="auth-check.js"></script>
-    <script type="module" src="edit-projects.js"></script>
+    <script type="module" src="edit-projects.js?v=20260806-tiers"></script>
 </body>
 </html>

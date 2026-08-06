@@ -1,5 +1,5 @@
 import { db } from "./firebase.js";
-import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { deleteField, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import { reload } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 function generateFormsId() {
@@ -63,15 +63,6 @@ export async function ensureUserProfile(user) {
             formsId: generateFormsId(),
             membership: "guest",
             role: "user",
-            specialAccess: {
-                enabled: false,
-                resources: {
-                    pipboy3000: false,
-                    vaultOS: false,
-                    authenticationTemplate: true,
-                    espBoy: false
-                }
-            },
             accountState: "guest",
             createdAt: serverTimestamp(),
             lastLoginAt: serverTimestamp()
@@ -88,6 +79,9 @@ export async function ensureUserProfile(user) {
         profilePicture: user.photoURL || currentProfile.profilePicture || "",
         lastLoginAt: serverTimestamp()
     };
+    if (Object.prototype.hasOwnProperty.call(currentProfile, "specialAccess")) {
+        updates.specialAccess = deleteField();
+    }
 
     if (staffAccess.isCompanyEmail) {
         updates.membership = "admin";

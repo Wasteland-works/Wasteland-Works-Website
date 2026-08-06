@@ -1,5 +1,5 @@
 import { auth, db } from "./firebase.js";
-import { ensureUserProfile } from "./profile.js";
+import { ensureUserProfile } from "./profile.js?v=20260806-tiers";
 import {
     onAuthStateChanged,
     sendEmailVerification,
@@ -36,7 +36,7 @@ function fillProfile(user, profile) {
     originalProfile = { displayName: name, username: profile.username || name };
     elements.welcomeMessage.textContent = `Welcome, ${name}`;
     elements.accountAvatar.textContent = name.slice(0, 2).toUpperCase();
-    elements.membershipDisplay.textContent = profile.membership || "Guest";
+    elements.membershipDisplay.textContent = profile.membership === "guest" ? "Visitor" : (profile.membership || "Visitor");
     elements.roleDisplay.textContent = profile.role || "User";
     elements.verificationDisplay.textContent = user.emailVerified ? "Verified" : "Not verified";
     elements.displayName.value = name;

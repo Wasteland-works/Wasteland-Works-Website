@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase.js";
 import {
     addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query,
-    serverTimestamp, updateDoc
+    serverTimestamp, setDoc, updateDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 const DOWNLOAD_GATEWAY = "https://wasteland-works-downloads.wellslee903.workers.dev";
 
@@ -9,7 +9,7 @@ const projectId = new URLSearchParams(location.search).get("id");
 const elements = Object.fromEntries([
     "editTitle", "editDescription", "editContent", "saveProjectButton", "deleteProjectButton",
     "newNote", "addNoteButton", "notesList", "githubAssetId", "fileName", "fileType", "fileSize",
-    "addFileButton", "fileList", "editorMessage"
+    "resourceKey", "addFileButton", "fileList", "editorMessage"
 ].map(id => [id, document.getElementById(id)]));
 
 function showMessage(text, type = "success") {
@@ -69,7 +69,9 @@ async function loadFiles() {
         name.textContent = file.name || "Protected download";
         const details = document.createElement("p");
         details.className = "muted";
-        details.textContent = file.githubAssetId ? `Protected asset ${file.githubAssetId}` : "Legacy file";
+        details.textContent = file.githubAssetId
+            ? `Protected asset ${file.githubAssetId} · ${file.resourceKey || "admin-only until classified"}`
+            : "Legacy file";
         const download = document.createElement("button");
         download.type = "button";
         download.textContent = "Test download";
@@ -94,6 +96,7 @@ async function loadFiles() {
         button.addEventListener("click", async () => {
             if (!confirm("Delete this file?")) return;
             await deleteDoc(fileSnapshot.ref);
+            if (file.githubAssetId) await deleteDoc(doc(db, "downloadAssets", String(file.githubAssetId)));
             await loadFiles();
         });
         entry.append(name, details);
@@ -169,12 +172,21 @@ elements.addFileButton.addEventListener("click", async () => {
     }
     elements.addFileButton.disabled = true;
     try {
+        const resourceKey = elements.resourceKey.value;
         await addDoc(collection(db, "projects", projectId, "files"), {
             name,
             type: elements.fileType.value.trim() || "application/octet-stream",
             size: Number(elements.fileSize.value) || 0,
             githubAssetId,
+            resourceKey,
             createdAt: serverTimestamp()
+        });
+        await setDoc(doc(db, "downloadAssets", githubAssetId), {
+            githubAssetId,
+            projectId,
+            name,
+            resourceKey,
+            updatedAt: serverTimestamp()
         });
         elements.githubAssetId.value = "";
         elements.fileName.value = "";

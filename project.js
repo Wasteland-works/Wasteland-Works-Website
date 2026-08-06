@@ -56,6 +56,8 @@ async function loadNotes() {
 }
 
 async function loadFiles() {
+    const catalogSnapshot = await getDocs(collection(db, "resourceCatalog"));
+    const catalog = new Map(catalogSnapshot.docs.map(item => [item.id, item.data()]));
     const snapshot = await getDocs(query(collection(db, "projects", projectId, "files"), orderBy("createdAt", "desc")));
     fileList.textContent = "";
     if (snapshot.empty) {
@@ -74,6 +76,13 @@ async function loadFiles() {
             entry.append(image);
         }
         if (file.githubAssetId) {
+            const access = document.createElement("p");
+            access.className = "muted";
+            const resource = catalog.get(file.resourceKey);
+            access.textContent = resource
+                ? `Download access: ${resource.minimumTier === "visitor" ? "Visitors" : resource.minimumTier} and above`
+                : "Download access: administrators until classified";
+            entry.append(access);
             const button = document.createElement("button");
             button.type = "button";
             button.textContent = file.name || "Download file";

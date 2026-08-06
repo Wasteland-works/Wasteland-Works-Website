@@ -23,15 +23,6 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ["founder", "employee"];
     }
 
-    function hasDownloadAccess() {
-      return signedIn()
-        && (
-          isFounder()
-          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.membership in ["member", "supporter", "premium"]
-          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.specialAccess.enabled == true
-        );
-    }
-
     function hasVerifiedCompanyEmail() {
       return signedIn()
         && request.auth.token.email_verified == true
@@ -54,7 +45,6 @@ service cloud.firestore {
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.membership == "admin"
         && request.resource.data.accountState == "admin"
-        && request.resource.data.specialAccess == resource.data.specialAccess
         && hasVerifiedCompanyEmail()
         && (
           request.resource.data.role == resource.data.role
@@ -69,15 +59,15 @@ service cloud.firestore {
       allow create: if ownsProfile(userId)
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.role == "user"
-        && request.resource.data.membership == "guest"
-        && request.resource.data.specialAccess.enabled == false;
+        && request.resource.data.membership == "guest";
 
       allow update: if (
         ownsProfile(userId)
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.role == resource.data.role
         && request.resource.data.membership == resource.data.membership
-        && request.resource.data.specialAccess == resource.data.specialAccess
+        && request.resource.data.accountState == resource.data.accountState
+        && request.resource.data.email == request.auth.token.email
       ) || isStaffAccessUpdate(userId);
 
       allow delete: if false;
@@ -93,9 +83,19 @@ service cloud.firestore {
       }
 
       match /files/{fileId} {
-        allow read: if hasDownloadAccess();
+        allow read: if true;
         allow create, update, delete: if isFounder();
       }
+    }
+
+    match /resourceCatalog/{resourceKey} {
+      allow read: if true;
+      allow create, update, delete: if isFounder();
+    }
+
+    match /downloadAssets/{assetId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isFounder();
     }
 
     match /teamMessages/{messageId} {
