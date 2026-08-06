@@ -39,6 +39,25 @@
         <section class="card">
             <h2>Protected downloads</h2>
             <p class="muted">Upload the large file to a release in the private downloads repository, then add its release asset details here.</p>
+
+            <details class="admin-upload-guide">
+                <summary>How to upload a protected file</summary>
+                <ol>
+                    <li>
+                        Open the private
+                        <a href="https://github.com/Wasteland-works/Wasteland-Works-Private-Downloads/releases" target="_blank" rel="noopener noreferrer">Wasteland Works downloads repository</a>.
+                    </li>
+                    <li>Select <strong>Draft a new release</strong>.</li>
+                    <li>Enter a version tag and release title, such as <strong>cascade-failure-v0.1</strong>.</li>
+                    <li>Drag the ZIP, installer or other project file into the release, wait for it to finish uploading, then select <strong>Publish release</strong>.</li>
+                    <li>Copy the uploaded file's numeric GitHub release asset ID. If you cannot find it, copy the release-page address and ask the website developer to retrieve it.</li>
+                    <li>Enter that number in <strong>Release asset ID</strong> below, then provide the name visitors should see.</li>
+                    <li>Choose the lowest membership level allowed to download the file and select <strong>Add protected download</strong>.</li>
+                    <li>Use <strong>Test download</strong> after it appears below to confirm everything works.</li>
+                </ol>
+                <p class="muted">The original file stays private on GitHub. The website checks the member's access before creating a short-lived download link.</p>
+            </details>
+
             <label for="githubAssetId">Release asset ID</label>
             <input id="githubAssetId" inputmode="numeric" pattern="[0-9]+" placeholder="Example: 123456789">
             <label for="fileName">Display name</label>
