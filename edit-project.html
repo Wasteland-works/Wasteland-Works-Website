@@ -38,26 +38,41 @@
 
         <section class="card">
             <h2>Protected downloads</h2>
-            <p class="muted">Upload the large file to a release in the private downloads repository, then add its release asset details here.</p>
+            <p class="muted">Prepare the download here, then publish one matching GitHub release. The website will find and connect the release file automatically.</p>
 
             <details class="admin-upload-guide">
-                <summary>How to upload a protected file</summary>
+                <summary>Automatic upload instructions</summary>
                 <ol>
+                    <li>Enter the GitHub release tag, exact file name and membership level below.</li>
+                    <li>Select <strong>Prepare automatic download</strong>. The project will show that it is awaiting its GitHub release.</li>
                     <li>
                         Open the private
                         <a href="https://github.com/Wasteland-works/Wasteland-Works-Private-Downloads/releases" target="_blank" rel="noopener noreferrer">Wasteland Works downloads repository</a>.
                     </li>
                     <li>Select <strong>Draft a new release</strong>.</li>
-                    <li>Enter a version tag and release title, such as <strong>cascade-failure-v0.1</strong>.</li>
+                    <li>Use the exact release tag shown below.</li>
                     <li>Drag the ZIP, installer or other project file into the release, wait for it to finish uploading, then select <strong>Publish release</strong>.</li>
-                    <li>Copy the uploaded file's numeric GitHub release asset ID. If you cannot find it, copy the release-page address and ask the website developer to retrieve it.</li>
-                    <li>Enter that number in <strong>Release asset ID</strong> below, then provide the name visitors should see.</li>
-                    <li>Choose the lowest membership level allowed to download the file and select <strong>Add protected download</strong>.</li>
-                    <li>Use <strong>Test download</strong> after it appears below to confirm everything works.</li>
+                    <li>That is all. The private-download gateway will locate the release file when a member requests it.</li>
                 </ol>
-                <p class="muted">The original file stays private on GitHub. The website checks the member's access before creating a short-lived download link.</p>
+                <p class="muted">The tag and file name are case-sensitive and must match GitHub exactly. The original file stays private on GitHub.</p>
             </details>
 
+            <label for="releaseTag">GitHub release tag</label>
+            <input id="releaseTag" type="text" placeholder="Example: cascade-failure-v0.1">
+            <label for="releaseAssetName">Exact GitHub file name</label>
+            <input id="releaseAssetName" type="text" placeholder="Example: Cascade-Failure.zip">
+            <label for="automaticResourceKey">Access category</label>
+            <select id="automaticResourceKey">
+                <option value="authentication-template">Authentication template — visitors and above</option>
+                <option value="pipboy-3000">Pip-Boy 3000 — members and above</option>
+                <option value="vault-os">Vault OS — supporters and above</option>
+                <option value="esp-boy">ESP Boy — premium and above</option>
+            </select>
+            <button id="prepareReleaseButton" type="button">Prepare automatic download</button>
+
+            <details class="admin-upload-guide">
+                <summary>Manual asset-ID fallback</summary>
+                <p class="muted">Use this only for an existing release that was not prepared automatically.</p>
             <label for="githubAssetId">Release asset ID</label>
             <input id="githubAssetId" inputmode="numeric" pattern="[0-9]+" placeholder="Example: 123456789">
             <label for="fileName">Display name</label>
@@ -74,6 +89,7 @@
                 <option value="esp-boy">ESP Boy — premium and above</option>
             </select>
             <button id="addFileButton" type="button">Add protected download</button>
+            </details>
             <p class="muted">Access is controlled centrally by membership tier. Removing an entry here does not delete the original release file.</p>
             <div id="fileList" class="entry-list">Loading files…</div>
         </section>
@@ -82,6 +98,6 @@
     </main>
 
     <script type="module" src="auth-check.js"></script>
-    <script type="module" src="edit-projects.js?v=20260806-tiers"></script>
+    <script type="module" src="edit-projects.js?v=20260806-auto-release"></script>
 </body>
 </html>

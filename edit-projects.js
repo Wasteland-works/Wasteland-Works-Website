@@ -9,7 +9,8 @@ const projectId = new URLSearchParams(location.search).get("id");
 const elements = Object.fromEntries([
     "editTitle", "editDescription", "editContent", "saveProjectButton", "deleteProjectButton",
     "newNote", "addNoteButton", "notesList", "githubAssetId", "fileName", "fileType", "fileSize",
-    "resourceKey", "addFileButton", "fileList", "editorMessage"
+    "resourceKey", "addFileButton", "releaseTag", "releaseAssetName", "automaticResourceKey",
+    "prepareReleaseButton", "fileList", "editorMessage"
 ].map(id => [id, document.getElementById(id)]));
 
 function showMessage(text, type = "success") {
@@ -25,6 +26,24 @@ async function loadProject() {
     elements.editTitle.value = project.title || "";
     elements.editDescription.value = project.description || "";
     elements.editContent.value = project.content || "";
+    if (!elements.releaseTag.value) {
+        elements.releaseTag.value = String(project.title || "project")
+            .trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    }
+}
+
+async function requestDownload(file, fileId) {
+    const token = await auth.currentUser.getIdToken();
+    const endpoint = file.githubAssetId
+        ? `${DOWNLOAD_GATEWAY}/ticket/${file.githubAssetId}`
+        : `${DOWNLOAD_GATEWAY}/ticket/project/${encodeURIComponent(projectId)}/${encodeURIComponent(fileId)}`;
+    const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || "Download denied.");
+    window.location.assign(result.downloadUrl);
 }
 
 async function loadNotes() {
@@ -71,20 +90,15 @@ async function loadFiles() {
         details.className = "muted";
         details.textContent = file.githubAssetId
             ? `Protected asset ${file.githubAssetId} · ${file.resourceKey || "admin-only until classified"}`
-            : "Legacy file";
+            : file.releaseTag
+                ? `Automatic release ${file.releaseTag} · ${file.resourceKey || "admin-only until classified"}`
+                : "Legacy file";
         const download = document.createElement("button");
         download.type = "button";
         download.textContent = "Test download";
         download.addEventListener("click", async () => {
             try {
-                const token = await auth.currentUser.getIdToken();
-                const response = await fetch(`${DOWNLOAD_GATEWAY}/ticket/${file.githubAssetId}`, {
-                    method: "POST",
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const result = await response.json();
-                if (!response.ok) throw new Error(result.error || "Download denied.");
-                window.location.assign(result.downloadUrl);
+                await requestDownload(file, fileSnapshot.id);
             } catch (error) {
                 showMessage(error.message, "error");
             }
@@ -100,7 +114,7 @@ async function loadFiles() {
             await loadFiles();
         });
         entry.append(name, details);
-        if (file.githubAssetId) entry.append(download);
+        if (file.githubAssetId || file.releaseTag) entry.append(download);
         entry.append(button);
         elements.fileList.append(entry);
     });
@@ -126,6 +140,35 @@ elements.saveProjectButton.addEventListener("click", async () => {
         showMessage("Couldn’t save this project.", "error");
     } finally {
         elements.saveProjectButton.disabled = false;
+    }
+});
+
+elements.prepareReleaseButton.addEventListener("click", async () => {
+    const releaseTag = elements.releaseTag.value.trim();
+    const releaseAssetName = elements.releaseAssetName.value.trim();
+    if (!releaseTag || !releaseAssetName) {
+        showMessage("Enter the GitHub release tag and exact file name.", "error");
+        return;
+    }
+    elements.prepareReleaseButton.disabled = true;
+    try {
+        await addDoc(collection(db, "projects", projectId, "files"), {
+            name: releaseAssetName,
+            type: "application/octet-stream",
+            size: 0,
+            releaseTag,
+            releaseAssetName,
+            resourceKey: elements.automaticResourceKey.value,
+            createdAt: serverTimestamp()
+        });
+        elements.releaseAssetName.value = "";
+        await loadFiles();
+        showMessage(`Automatic download prepared. Publish GitHub tag “${releaseTag}” with that exact file name.`);
+    } catch (error) {
+        console.error(error);
+        showMessage("Couldn’t prepare the automatic download.", "error");
+    } finally {
+        elements.prepareReleaseButton.disabled = false;
     }
 });
 

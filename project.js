@@ -9,11 +9,14 @@ const notesList = document.getElementById("notesList");
 const fileList = document.getElementById("fileList");
 const DOWNLOAD_GATEWAY = "https://wasteland-works-downloads.wellslee903.workers.dev";
 
-async function startProtectedDownload(assetId) {
+async function startProtectedDownload(file, fileId) {
     const user = auth.currentUser;
     if (!user) throw new Error("Sign in with an authorised membership to download this file.");
     const token = await user.getIdToken();
-    const response = await fetch(`${DOWNLOAD_GATEWAY}/ticket/${assetId}`, {
+    const endpoint = file.githubAssetId
+        ? `${DOWNLOAD_GATEWAY}/ticket/${file.githubAssetId}`
+        : `${DOWNLOAD_GATEWAY}/ticket/project/${encodeURIComponent(projectId)}/${encodeURIComponent(fileId)}`;
+    const response = await fetch(endpoint, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` }
     });
@@ -75,7 +78,7 @@ async function loadFiles() {
             image.alt = file.name || "Project image";
             entry.append(image);
         }
-        if (file.githubAssetId) {
+        if (file.githubAssetId || file.releaseTag) {
             const access = document.createElement("p");
             access.className = "muted";
             const resource = catalog.get(file.resourceKey);
@@ -91,7 +94,7 @@ async function loadFiles() {
                 const originalText = button.textContent;
                 button.textContent = "Preparing download…";
                 try {
-                    await startProtectedDownload(String(file.githubAssetId));
+                    await startProtectedDownload(file, fileSnapshot.id);
                 } catch (error) {
                     console.error(error);
                     button.disabled = false;
