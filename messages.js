@@ -65,8 +65,23 @@ function allVisibleMessages() {
 }
 
 function messageExcerpt(body) {
-    const text = String(body || "").replace(/\s+/g, " ").trim();
+    const text = parseReplyBody(body).body.replace(/\s+/g, " ").trim();
     return text.length > 140 ? `${text.slice(0, 137)}…` : text;
+}
+
+function parseReplyBody(body) {
+    const text = String(body || "");
+    const match = text.match(/^\[Reply to: ([^\]]+)\]\n\[Original: ([^\]]*)\]\n\n([\s\S]*)$/);
+    return match
+        ? { authorName: match[1], excerpt: match[2], body: match[3] }
+        : { authorName: null, excerpt: null, body: text };
+}
+
+function replyBody(body) {
+    if (!replyingTo) return body;
+    const authorName = replyingTo.authorName.replace(/[\[\]\n\r]/g, "").trim() || "Team member";
+    const excerpt = replyingTo.excerpt.replace(/[\[\]\n\r]/g, " ").trim();
+    return `[Reply to: ${authorName}]\n[Original: ${excerpt}]\n\n${body}`;
 }
 
 function updatePostButtonLabel() {
@@ -132,17 +147,18 @@ function renderMessages() {
         time.textContent = formatDate(message.createdAt);
         header.append(authorGroup, time);
 
+        const parsedBody = parseReplyBody(message.body);
         const body = document.createElement("p");
-        body.textContent = message.body || "";
+        body.textContent = parsedBody.body;
         article.append(header);
 
-        if (message.replyToId) {
+        if (parsedBody.authorName) {
             const replyReference = document.createElement("div");
             replyReference.className = "team-message-reply-reference";
             const replyLabel = document.createElement("strong");
-            replyLabel.textContent = `Reply to ${message.replyToAuthorName || "a previous message"}`;
+            replyLabel.textContent = `Reply to ${parsedBody.authorName}`;
             const replyPreview = document.createElement("p");
-            replyPreview.textContent = message.replyToExcerpt || "Previous message";
+            replyPreview.textContent = parsedBody.excerpt || "Previous message";
             replyReference.append(replyLabel, replyPreview);
             article.append(replyReference);
         }
@@ -256,19 +272,14 @@ postButton.addEventListener("click", async () => {
         await addDoc(collection(db, "teamMessages"), {
             authorId: currentUser.uid,
             authorName: currentProfile.displayName || currentProfile.username || currentUser.email || "Team member",
-            body,
+            body: replyBody(body),
             kind: messageType.value,
             recipientId,
             recipientName: recipientId ? recipient.displayName : null,
             recipientEmail: recipientId ? recipient.email : null,
             readAt: null,
             emailStatus: recipientId ? "pending" : "not-needed",
-            createdAt: serverTimestamp(),
-            ...(replyingTo ? {
-                replyToId: replyingTo.id,
-                replyToAuthorName: replyingTo.authorName,
-                replyToExcerpt: replyingTo.excerpt
-            } : {})
+            createdAt: serverTimestamp()
         });
         messageBody.value = "";
         clearReply();
