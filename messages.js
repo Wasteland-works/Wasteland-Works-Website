@@ -23,6 +23,10 @@ const messageType = document.getElementById("messageType");
 const recipientHint = document.getElementById("recipientHint");
 const messageBody = document.getElementById("messageBody");
 const postButton = document.getElementById("postMessage");
+const replyContext = document.getElementById("replyContext");
+const replyContextTitle = document.getElementById("replyContextTitle");
+const replyContextPreview = document.getElementById("replyContextPreview");
+const cancelReply = document.getElementById("cancelReply");
 const messageStatus = document.getElementById("messageStatus");
 const messageList = document.getElementById("messageList");
 
@@ -31,6 +35,7 @@ let currentProfile = null;
 let updateMessages = [];
 let privateMessages = [];
 let directoryMembers = [];
+let replyingTo = null;
 const listeners = [];
 
 function isTeamMember(profile) {
@@ -59,6 +64,44 @@ function allVisibleMessages() {
     return [...byId.values()].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 }
 
+function messageExcerpt(body) {
+    const text = String(body || "").replace(/\s+/g, " ").trim();
+    return text.length > 140 ? `${text.slice(0, 137)}…` : text;
+}
+
+function updatePostButtonLabel() {
+    postButton.textContent = replyingTo ? "Post reply" : "Post message";
+}
+
+function clearReply() {
+    replyingTo = null;
+    replyContext.hidden = true;
+    replyContextTitle.textContent = "Replying to a message";
+    replyContextPreview.textContent = "";
+    updatePostButtonLabel();
+}
+
+function beginReply(message) {
+    const targetId = message.authorId === currentUser.uid ? message.recipientId : message.authorId;
+    replyingTo = {
+        id: message.id,
+        authorName: message.authorName || "Team member",
+        excerpt: messageExcerpt(message.body),
+        targetId: targetId || null,
+        kind: message.kind === "gotIt" ? "gotIt" : "update"
+    };
+    messageType.value = replyingTo.kind;
+    updateMessageTypeHelp();
+    replyContextTitle.textContent = `Replying to ${replyingTo.authorName}`;
+    replyContextPreview.textContent = replyingTo.excerpt;
+    replyContext.hidden = false;
+    updatePostButtonLabel();
+    messageBody.focus();
+    messageBody.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+cancelReply.addEventListener("click", clearReply);
+
 function renderMessages() {
     const messages = allVisibleMessages();
     messageList.replaceChildren();
@@ -73,6 +116,7 @@ function renderMessages() {
     messages.forEach(message => {
         const article = document.createElement("article");
         article.className = "team-message";
+        article.id = `team-message-${message.id}`;
 
         const header = document.createElement("div");
         header.className = "team-message-header";
@@ -90,7 +134,20 @@ function renderMessages() {
 
         const body = document.createElement("p");
         body.textContent = message.body || "";
-        article.append(header, body);
+        article.append(header);
+
+        if (message.replyToId) {
+            const replyReference = document.createElement("div");
+            replyReference.className = "team-message-reply-reference";
+            const replyLabel = document.createElement("strong");
+            replyLabel.textContent = `Reply to ${message.replyToAuthorName || "a previous message"}`;
+            const replyPreview = document.createElement("p");
+            replyPreview.textContent = message.replyToExcerpt || "Previous message";
+            replyReference.append(replyLabel, replyPreview);
+            article.append(replyReference);
+        }
+
+        article.append(body);
 
         if (message.recipientName) {
             const recipient = document.createElement("p");
@@ -101,6 +158,13 @@ function renderMessages() {
 
         const actions = document.createElement("div");
         actions.className = "form-actions";
+
+        const reply = document.createElement("button");
+        reply.className = "button";
+        reply.type = "button";
+        reply.textContent = "Reply";
+        reply.addEventListener("click", () => beginReply(message));
+        actions.append(reply);
 
         if (message.recipientId === currentUser.uid && !message.readAt && message.kind === "update") {
             const markRead = document.createElement("button");
@@ -165,7 +229,11 @@ function resolveMention(body) {
 postButton.addEventListener("click", async () => {
     const body = messageBody.value.trim();
     const mention = resolveMention(body);
-    const recipientId = mention.member?.id || null;
+    const replyMember = replyingTo?.targetId
+        ? directoryMembers.find(item => item.id === replyingTo.targetId)
+        : null;
+    const recipient = mention.member || replyMember || null;
+    const recipientId = recipient?.id || null;
     if (!body) {
         messageStatus.textContent = "Write a message before posting.";
         messageStatus.className = "form-message error";
@@ -191,13 +259,19 @@ postButton.addEventListener("click", async () => {
             body,
             kind: messageType.value,
             recipientId,
-            recipientName: recipientId ? mention.member.displayName : null,
-            recipientEmail: recipientId ? mention.member.email : null,
+            recipientName: recipientId ? recipient.displayName : null,
+            recipientEmail: recipientId ? recipient.email : null,
             readAt: null,
             emailStatus: recipientId ? "pending" : "not-needed",
-            createdAt: serverTimestamp()
+            createdAt: serverTimestamp(),
+            ...(replyingTo ? {
+                replyToId: replyingTo.id,
+                replyToAuthorName: replyingTo.authorName,
+                replyToExcerpt: replyingTo.excerpt
+            } : {})
         });
         messageBody.value = "";
+        clearReply();
         messageStatus.textContent = recipientId
             ? "Message posted and the recipient has been notified on the website."
             : "General update posted.";
@@ -208,7 +282,7 @@ postButton.addEventListener("click", async () => {
         messageStatus.className = "form-message error";
     } finally {
         postButton.disabled = false;
-        postButton.textContent = "Post message";
+        updatePostButtonLabel();
     }
 });
 

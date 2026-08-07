@@ -108,7 +108,8 @@ service cloud.firestore {
       allow create: if isTeamMember()
         && request.resource.data.keys().hasOnly([
           "authorId", "authorName", "body", "kind", "recipientId", "recipientName",
-          "recipientEmail", "readAt", "emailStatus", "createdAt"
+          "recipientEmail", "readAt", "emailStatus", "createdAt",
+          "replyToId", "replyToAuthorName", "replyToExcerpt"
         ])
         && request.resource.data.authorId == request.auth.uid
         && request.resource.data.authorName is string

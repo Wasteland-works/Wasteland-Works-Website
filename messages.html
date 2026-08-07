@@ -28,6 +28,13 @@
                     <option value="gotIt">Got it message</option>
                 </select>
                 <label for="messageBody">New message</label>
+                <div id="replyContext" class="team-reply-context" hidden>
+                    <div>
+                        <strong id="replyContextTitle">Replying to a message</strong>
+                        <p id="replyContextPreview"></p>
+                    </div>
+                    <button id="cancelReply" class="button" type="button">Cancel reply</button>
+                </div>
                 <textarea id="messageBody" maxlength="4000" placeholder="Type @username to mention somebody"></textarea>
                 <p id="recipientHint" class="muted">Type @ followed by a team member’s username, for example: @Ren here’s an update.</p>
                 <div class="form-actions">
@@ -46,7 +53,7 @@
     </main>
 
     <div id="site-footer"></div>
-    <script src="load-layout.js?v=20260805-mentions"></script>
-    <script type="module" src="messages.js?v=20260805-mentions"></script>
+    <script src="load-layout.js?v=20260807-replies"></script>
+    <script type="module" src="messages.js?v=20260807-replies"></script>
 </body>
 </html>
